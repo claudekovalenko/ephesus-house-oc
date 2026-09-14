@@ -56,18 +56,26 @@
     },
 
     head: function (extra) {
-      return Object.assign({
-        apikey: this.cfg.key,
-        Authorization: 'Bearer ' + this.cfg.key,
-        'Content-Type': 'application/json'
-      }, extra || {});
+      var h = { apikey: this.cfg.key, 'Content-Type': 'application/json' };
+      // PostgREST reads Authorization as a JWT. Sending a non-JWT key there is
+      // a 401, so only set it when the key really is one.
+      if (/^ey[A-Za-z0-9_-]/.test(this.cfg.key)) h.Authorization = 'Bearer ' + this.cfg.key;
+      return Object.assign(h, extra || {});
+    },
+
+    /* Turn a failed response into an error that says what actually happened. */
+    fail: function (res, what) {
+      return res.text().catch(function () { return ''; }).then(function (body) {
+        var detail = (body || res.statusText || '').replace(/\s+/g, ' ').slice(0, 160);
+        throw new Error(what + ' failed: HTTP ' + res.status + (detail ? ' — ' + detail : ''));
+      });
     },
 
     all: function () {
       return fetch(this.base() + '?select=path,data', {
         headers: this.head(), cache: 'no-store'
       }).then(function (res) {
-        if (!res.ok) throw new Error('read ' + res.status);
+        if (!res.ok) return Cloud.fail(res, 'Reading the board');
         return res.json();
       });
     },
@@ -83,14 +91,14 @@
           doc_id: path.slice(cut + 1),
           data: data
         })
-      }).then(function (res) { if (!res.ok) throw new Error('write ' + res.status); });
+      }).then(function (res) { if (!res.ok) return Cloud.fail(res, 'Saving'); });
     },
 
     del: function (path) {
       return fetch(this.base() + '?path=eq.' + encodeURIComponent(path), {
         method: 'DELETE',
         headers: this.head({ Prefer: 'return=minimal' })
-      }).then(function (res) { if (!res.ok) throw new Error('delete ' + res.status); });
+      }).then(function (res) { if (!res.ok) return Cloud.fail(res, 'Deleting'); });
     }
   };
 
@@ -99,6 +107,7 @@
     ready: false,
     shared: false,
     offline: false,
+    lastError: null,
     snapshotOf: null,
     pending: 0,
     onChange: function () {},
@@ -144,11 +153,14 @@
         });
         self.raw = next;
         self.offline = false;
+        self.lastError = null;
         self.ready = true;
         self.persistLocal();
         self.onChange();
-      }).catch(function () {
+      }).catch(function (err) {
         self.offline = true;
+        self.lastError = (err && err.message) ||
+          'the request never completed (network, CORS, or the host is unreachable)';
         self.ready = true;
         self.onChange();
       });
@@ -205,11 +217,12 @@
       return Cloud.put(path, data).then(function () {
         self.pending--;
         return self.pull();
-      }).catch(function (e) {
+      }).catch(function (err) {
         self.pending--;
         self.offline = true;
+        self.lastError = (err && err.message) || 'the request never completed';
         self.onChange();
-        App.flash('That did not save to the shared board. Check your connection.');
+        App.flash('That did not save. ' + self.lastError);
       });
     },
 
@@ -233,11 +246,12 @@
       return Cloud.del(path).then(function () {
         self.pending--;
         return self.pull();
-      }).catch(function () {
+      }).catch(function (err) {
         self.pending--;
         self.offline = true;
+        self.lastError = (err && err.message) || 'the request never completed';
         self.onChange();
-        App.flash('That did not save to the shared board. Check your connection.');
+        App.flash('That did not save. ' + self.lastError);
       });
     },
 
@@ -399,8 +413,9 @@
       var notice = '';
       if (Store.offline) {
         notice = '<div class="banner"><b>Cannot reach the board.</b> ' +
-          'Showing the last copy this phone saw. Anything you change now will not ' +
-          'save until the connection is back.</div>';
+          'Showing the last copy this phone saw; changes will not save. ' +
+          (Store.lastError ? '<br><span class="why">' + h(Store.lastError) + '</span>' : '') +
+          '<br><a href="check.html">Run the connection check</a></div>';
       } else if (Store.ready && !Store.shared) {
         notice = '<div class="banner"><b>This device only.</b> ' +
           (Store.snapshotOf ? 'Copy of the house board as it stood on ' +

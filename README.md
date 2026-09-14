@@ -8,6 +8,10 @@ turns and keeps the rotation fair, with no erasing and rewriting.
 
 - **The board:** https://claudekovalenko.github.io/ephesus-house-oc/
   — shared across every phone, no account needed. This is the link to hand out.
+- **Connection check:** https://claudekovalenko.github.io/ephesus-house-oc/check.html
+  — open this if the board misbehaves. It reports, in order, whether the settings
+  file loaded, whether the key is the right shape, and what the database actually
+  answered for a read, a write and a delete.
 - The old https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN link is now just a
   signpost pointing at the board, so anyone who still has it gets through.
 - **Product requirements:** [`docs/PRD.md`](docs/PRD.md)

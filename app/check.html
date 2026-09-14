@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Board connection check</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { padding-block: 24px; }
+  .row { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px;
+         border-bottom: 1px solid var(--line-soft); }
+  .row:last-child { border-bottom: 0; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; margin-top: 6px;
+         background: var(--muted); }
+  .dot.ok { background: var(--good); }
+  .dot.bad { background: var(--danger); }
+  .what { font-weight: 500; }
+  .detail { margin-top: 3px; font-family: var(--mono); font-size: .6875rem;
+            color: var(--muted); word-break: break-word; white-space: pre-wrap; }
+  .detail.bad { color: var(--danger); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sec">
+    <div class="sec-head"><h2>Board connection check</h2></div>
+    <div class="panel" id="out"><div class="empty">Checking…</div></div>
+    <p class="hint" style="margin-top:10px">
+      Screenshot this page and send it over if the board is not working.
+    </p>
+    <div class="btn-row" style="margin-top:10px">
+      <a class="btn" href="./">Back to the board</a>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  var out = document.getElementById('out');
+  var rows = [];
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function add(state, what, detail) {
+    rows.push('<div class="row"><span class="dot ' + state + '"></span><div>' +
+      '<div class="what">' + esc(what) + '</div>' +
+      (detail ? '<div class="detail ' + (state === 'bad' ? 'bad' : '') + '">' +
+        esc(detail) + '</div>' : '') + '</div></div>');
+    out.innerHTML = rows.join('');
+  }
+
+  var cfg = window.EPHESUS;
+  if (!cfg || !cfg.url || !cfg.key) {
+    add('bad', 'Settings file did not load', 'config.js is missing or empty');
+    return;
+  }
+  add('ok', 'Settings file loaded', cfg.url);
+  add(/^ey[A-Za-z0-9_-]/.test(cfg.key) ? 'ok' : 'bad',
+      'Key format', /^ey[A-Za-z0-9_-]/.test(cfg.key)
+        ? 'JWT anon key, as PostgREST expects'
+        : 'not a JWT — PostgREST will answer 401');
+
+  var base = cfg.url + '/rest/v1/' + (cfg.table || 'chores_docs');
+  var head = { apikey: cfg.key, 'Content-Type': 'application/json' };
+  if (/^ey[A-Za-z0-9_-]/.test(cfg.key)) head.Authorization = 'Bearer ' + cfg.key;
+
+  var started = Date.now();
+  fetch(base + '?select=path', { headers: head, cache: 'no-store' })
+    .then(function (res) {
+      return res.text().then(function (body) {
+        var ms = Date.now() - started;
+        if (!res.ok) {
+          add('bad', 'Reading the board', 'HTTP ' + res.status + ' after ' + ms + 'ms\n' + body.slice(0, 300));
+          return;
+        }
+        var n;
+        try { n = JSON.parse(body).length; } catch (e) { n = '?'; }
+        add('ok', 'Reading the board', n + ' rows in ' + ms + 'ms');
+        return writeCheck();
+      });
+    })
+    .catch(function (err) {
+      add('bad', 'Reading the board',
+        'the request never completed: ' + (err && err.message) +
+        '\nusually network, or the browser blocking the cross-site request');
+    });
+
+  function writeCheck() {
+    var probe = 'config/_check_' + Math.random().toString(36).slice(2, 8);
+    return fetch(base + '?on_conflict=path', {
+      method: 'POST',
+      headers: Object.assign({}, head, { Prefer: 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify({ path: probe, collection: 'config', doc_id: probe, data: { check: true } })
+    }).then(function (res) {
+      if (!res.ok) {
+        return res.text().then(function (b) {
+          add('bad', 'Saving to the board', 'HTTP ' + res.status + '\n' + b.slice(0, 300));
+        });
+      }
+      add('ok', 'Saving to the board', 'write accepted');
+      return fetch(base + '?path=eq.' + encodeURIComponent(probe), {
+        method: 'DELETE', headers: Object.assign({}, head, { Prefer: 'return=minimal' })
+      }).then(function (r2) {
+        add(r2.ok ? 'ok' : 'bad', 'Clearing up the test row', 'HTTP ' + r2.status);
+      });
+    }).catch(function (err) {
+      add('bad', 'Saving to the board', String(err && err.message));
+    });
+  }
+})();
+</script>
+</body>
+</html>
