@@ -1,38 +1,38 @@
 {
+  "exportedAt": "2026-09-14",
   "config": {
     "house": {
+      "balanceCovers": false,
+      "housemates": {
+        "demitrius": {
+          "active": true,
+          "color": "#a8478b",
+          "name": "Demitrius"
+        },
+        "ivan": {
+          "active": true,
+          "color": "#dd6b36",
+          "name": "Ivan"
+        },
+        "jett": {
+          "active": true,
+          "color": "#14907e",
+          "name": "Jett"
+        }
+      },
       "rotation": [
         "ivan",
         "jett",
         "demitrius"
       ],
-      "housemates": {
-        "ivan": {
-          "name": "Ivan",
-          "color": "#dd6b36",
-          "active": true
-        },
-        "jett": {
-          "name": "Jett",
-          "color": "#14907e",
-          "active": true
-        },
-        "demitrius": {
-          "name": "Demitrius",
-          "color": "#a8478b",
-          "active": true
-        }
-      },
-      "weekStart": 1,
       "timezone": "America/Los_Angeles",
-      "balanceCovers": false,
-      "updatePointer": "ivan"
+      "updatePointer": "ivan",
+      "weekStart": 1
     },
     "reminders": {
       "groups": [
         {
           "id": "bathroom",
-          "label": "Bathroom",
           "items": [
             "Close the window when the AC is on",
             "Nothing wet on the cabinet, it is wood",
@@ -40,101 +40,51 @@
             "Leave the toilet lid on",
             "Shave onto a paper towel",
             "Squeegee the shower glass"
-          ]
+          ],
+          "label": "Bathroom"
         },
         {
           "id": "kitchen",
-          "label": "Kitchen",
           "items": [
             "Take the trash out if it is on the floor",
             "If it cannot go in the dishwasher, do it by hand",
             "Empty the dishwasher if you can",
             "Take the trash out when it is three quarters full",
             "Fan on in the kitchen when cooking"
-          ]
+          ],
+          "label": "Kitchen"
         },
         {
           "id": "garage_house",
-          "label": "Garage and house",
           "items": [
             "Close the fridge fully",
             "Close the garage door",
             "Deadbolt the house door",
             "Bags in the bin straight up",
             "Street sweeping is Friday, move the cars off the curb"
-          ]
+          ],
+          "label": "Garage and house"
         }
       ]
     }
   },
   "chores": {
-    "pool": {
-      "name": "Clean the pool",
-      "day": 2,
-      "cadence": "weekly",
-      "mode": "rotate",
-      "anchorPerson": "ivan",
-      "anchorDate": "2026-09-14",
-      "isZone": false,
-      "window": "",
-      "note": "",
-      "order": 1
-    },
-    "trash": {
-      "name": "Take out the trash",
-      "day": 3,
-      "cadence": "weekly",
-      "mode": "rotate",
-      "anchorPerson": "jett",
-      "anchorDate": "2026-09-14",
-      "isZone": false,
-      "window": "4–8 PM",
-      "note": "Both bins to the curb",
-      "order": 2
-    },
     "cans": {
-      "name": "Bring in the cans",
-      "day": 4,
-      "cadence": "weekly",
-      "mode": "rotate",
+      "anchorDate": "2026-09-14",
       "anchorPerson": "demitrius",
-      "anchorDate": "2026-09-14",
+      "cadence": "weekly",
+      "day": 4,
       "isZone": false,
-      "window": "Morning",
-      "note": "Handles toward the street",
-      "order": 3
-    },
-    "deep-kitchen": {
-      "cadence": "biweekly",
       "mode": "rotate",
-      "holdPeriod": "month",
-      "anchorDate": "2026-09-14",
-      "isZone": false,
-      "window": "",
-      "note": "",
-      "name": "Deep clean the kitchen",
-      "anchorPerson": "ivan",
-      "order": 10,
-      "checklist": [
-        "Sweep and mop the floor",
-        "Clear the counters and clean them fully, under everything",
-        "Clean the inside of the sink",
-        "Wipe down the tables",
-        "Clean the stove"
-      ],
-      "undated": true
+      "name": "Bring in the cans",
+      "note": "Handles toward the street",
+      "order": 3,
+      "window": "Morning"
     },
     "deep-bathroom": {
-      "cadence": "biweekly",
-      "mode": "rotate",
-      "holdPeriod": "month",
       "anchorDate": "2026-09-14",
-      "isZone": false,
-      "window": "",
-      "note": "",
-      "name": "Deep clean the bathroom",
       "anchorPerson": "jett",
-      "order": 11,
+      "cadence": "biweekly",
       "checklist": [
         "Clean the shower",
         "Clean the shower door",
@@ -142,58 +92,109 @@
         "Clean the sink and counter",
         "Sweep and mop the floor"
       ],
-      "undated": true
+      "holdPeriod": "month",
+      "isZone": false,
+      "mode": "rotate",
+      "name": "Deep clean the bathroom",
+      "note": "",
+      "order": 11,
+      "undated": true,
+      "window": ""
+    },
+    "deep-kitchen": {
+      "anchorDate": "2026-09-14",
+      "anchorPerson": "ivan",
+      "cadence": "biweekly",
+      "checklist": [
+        "Sweep and mop the floor",
+        "Clear the counters and clean them fully, under everything",
+        "Clean the inside of the sink",
+        "Wipe down the tables",
+        "Clean the stove"
+      ],
+      "holdPeriod": "month",
+      "isZone": false,
+      "mode": "rotate",
+      "name": "Deep clean the kitchen",
+      "note": "",
+      "order": 10,
+      "undated": true,
+      "window": ""
     },
     "deep-living": {
-      "cadence": "biweekly",
-      "mode": "rotate",
-      "holdPeriod": "month",
       "anchorDate": "2026-09-14",
-      "isZone": false,
-      "window": "",
-      "note": "",
-      "name": "Deep clean the living and dining room",
       "anchorPerson": "demitrius",
-      "order": 12,
+      "cadence": "biweekly",
       "checklist": [
         "Dust",
         "Dust the fans",
         "Vacuum",
         "Wipe down the tables"
       ],
-      "undated": true
+      "holdPeriod": "month",
+      "isZone": false,
+      "mode": "rotate",
+      "name": "Deep clean the living and dining room",
+      "note": "",
+      "order": 12,
+      "undated": true,
+      "window": ""
+    },
+    "pool": {
+      "anchorDate": "2026-09-14",
+      "anchorPerson": "ivan",
+      "cadence": "weekly",
+      "day": 2,
+      "isZone": false,
+      "mode": "rotate",
+      "name": "Clean the pool",
+      "note": "",
+      "order": 1,
+      "window": ""
+    },
+    "trash": {
+      "anchorDate": "2026-09-14",
+      "anchorPerson": "jett",
+      "cadence": "weekly",
+      "day": 3,
+      "isZone": false,
+      "mode": "rotate",
+      "name": "Take out the trash",
+      "note": "Both bins to the curb",
+      "order": 2,
+      "window": "4–8 PM"
     }
   },
   "updates": {
-    "u-lights": {
-      "title": "Wipe down the lights",
-      "note": "",
-      "due": null,
+    "u-cardboard": {
       "assignee": null,
       "createdAt": "2026-09-14T00:00:00.000Z",
       "createdBy": null,
       "doneAt": null,
-      "doneBy": null
+      "doneBy": null,
+      "due": null,
+      "note": "All the foam in one box",
+      "title": "Break down the cardboard"
+    },
+    "u-lights": {
+      "assignee": null,
+      "createdAt": "2026-09-14T00:00:00.000Z",
+      "createdBy": null,
+      "doneAt": null,
+      "doneBy": null,
+      "due": null,
+      "note": "",
+      "title": "Wipe down the lights"
     },
     "u-planters": {
-      "title": "Build the planters",
-      "note": "",
+      "assignee": null,
+      "createdAt": "2026-09-14T00:00:00.000Z",
+      "createdBy": null,
+      "doneAt": null,
+      "doneBy": null,
       "due": "2026-09-25",
-      "assignee": null,
-      "createdAt": "2026-09-14T00:00:00.000Z",
-      "createdBy": null,
-      "doneAt": null,
-      "doneBy": null
-    },
-    "u-cardboard": {
-      "title": "Break down the cardboard",
-      "note": "All the foam in one box",
-      "due": null,
-      "assignee": null,
-      "createdAt": "2026-09-14T00:00:00.000Z",
-      "createdBy": null,
-      "doneAt": null,
-      "doneBy": null
+      "note": "",
+      "title": "Build the planters"
     }
   },
   "absences": {},

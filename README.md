@@ -9,9 +9,10 @@ turns and keeps the rotation fair, with no erasing and rewriting.
 - **Live app (shared):** https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN
   — this is the one to use. All three housemates see the same board.
 - **GitHub Pages copy:** https://claudekovalenko.github.io/ephesus-house-oc/
-  — same app, but **each device gets its own private board.** Shared storage is
-  only available inside the Claude viewer, so the Pages copy is a demo, not the
-  house board. It says so on screen.
+  — the whole board, boots from `app/seed.json`, but **each device gets its own
+  private copy.** Shared storage only exists inside the Claude viewer. Tick
+  something here and nobody else sees it. The page says so at the bottom of the
+  board and offers a button to reload the house board.
 - **Product requirements:** [`docs/PRD.md`](docs/PRD.md)
 - **The original board:** [`docs/assets/whiteboard-2026-09.jpg`](docs/assets/whiteboard-2026-09.jpg)
   and [the reminders corner](docs/assets/whiteboard-2026-09-reminders.jpg)
@@ -92,5 +93,16 @@ Shared state lives in the artifact's document store:
 Only `occurrences` grows over time, at roughly 300 documents a year for six
 chores against a 5,000 document cap. Prune finished years if it ever gets close.
 
-`app/seed.json` is the starting board, transcribed from the photo. It is the
-reference for a fresh setup, not something the app reads at runtime.
+`app/seed.json` is a snapshot of the live board, and the standalone copy boots
+from it when there is no shared store. Refresh it after changing the house setup:
+
+```bash
+# export the live collections to a directory, one JSON file per document,
+# then:
+node tools/assemble-seed.js <export-dir>
+```
+
+Progress is deliberately not carried into the snapshot. Who ticked what is live
+state; freezing one evening's checkmarks into every new visitor's board would
+only mislead. Setup — housemates, rotation, chores, reminders, special tasks — is
+carried in full.

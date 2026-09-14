@@ -49,6 +49,7 @@
     raw: { config: {}, chores: {}, absences: {}, updates: {}, occurrences: {} },
     ready: false,
     shared: false,
+    snapshotOf: null,
     onChange: function () {},
 
     start: function (onChange) {
@@ -68,12 +69,41 @@
       }).catch(function () { self.startLocal(); });
     },
 
-    startLocal: function () {
-      var saved = safeLocal(function () { return JSON.parse(localStorage.getItem(LOCAL_KEY)); }, null);
-      if (saved) this.raw = saved;
-      this.ready = true;
+    /* No shared store in this view. Use whatever this browser already holds;
+       failing that, boot from the snapshot of the house board shipped with the
+       page, so the board is never empty on a first visit. */
+    startLocal: function (force) {
+      var self = this;
       this.shared = false;
-      this.onChange();
+
+      if (!force) {
+        var saved = safeLocal(function () { return JSON.parse(localStorage.getItem(LOCAL_KEY)); }, null);
+        if (saved && saved.config && saved.config.house) {
+          this.raw = saved;
+          this.ready = true;
+          this.onChange();
+          return;
+        }
+      }
+
+      fetch('seed.json', { cache: 'no-cache' })
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (data) {
+          if (data && data.config && data.config.house) {
+            self.raw = {
+              config: data.config || {},
+              chores: data.chores || {},
+              updates: data.updates || {},
+              absences: data.absences || {},
+              occurrences: data.occurrences || {}
+            };
+            self.snapshotOf = data.exportedAt || null;
+            self.persistLocal();
+          }
+          self.ready = true;
+          self.onChange();
+        })
+        .catch(function () { self.ready = true; self.onChange(); });
     },
 
     subscribe: function () {
@@ -457,9 +487,11 @@
 
       if (!Store.shared) {
         out += '<div class="banner"><b>This device only.</b> ' +
-          'Nothing here reaches the other phones \u2014 changes stay in this browser. ' +
-          'The board the whole house shares lives at ' +
-          '<a href="https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN">claude.ai</a>.</div>';
+          (Store.snapshotOf ? 'Copy of the house board as it stood on ' +
+            pretty(Store.snapshotOf) + '. ' : '') +
+          'Nothing you tick here reaches the other phones. The board the house ' +
+          'shares is at <a href="https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN">claude.ai</a>.' +
+          '</div>';
       }
 
       return out;
@@ -819,11 +851,18 @@
         '<div class="panel"><img src="whiteboard.jpg" alt="The original whiteboard on the fridge" ' +
         'loading="lazy" style="display:block;width:100%;height:auto"></div></div>';
 
-      out += '<div class="sec"><p class="hint">' +
-        (Store.shared
-          ? 'Changes are shared with everyone who opens this page.'
-          : 'Shared storage is unavailable in this view, so changes stay in this browser.') +
-        '</p></div>';
+      if (Store.shared) {
+        out += '<div class="sec"><p class="hint">' +
+          'Changes are shared with everyone who opens this page.</p></div>';
+      } else {
+        out += '<div class="sec"><div class="sec-head"><h2>This copy</h2></div>' +
+          '<div class="panel"><div class="form">' +
+          '<p class="hint" style="margin:0">Changes stay in this browser. Reloading the ' +
+          'house board throws away anything you have changed here and starts again from ' +
+          'the shared board\u2019s last export.</p>' +
+          '<div class="btn-row"><button class="btn danger" data-act="reseed">' +
+          'Reload the house board</button></div></div></div></div>';
+      }
 
       return out;
     },
@@ -1156,6 +1195,14 @@
             housemates: mates,
             rotation: s.rotation.filter(function (x) { return x !== id; })
           });
+        },
+
+        reseed: function () {
+          safeLocal(function () {
+            localStorage.removeItem(LOCAL_KEY);
+            localStorage.removeItem(CACHE_KEY);
+          });
+          Store.startLocal(true);
         },
 
         togbalance: function () {
