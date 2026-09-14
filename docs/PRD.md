@@ -70,14 +70,20 @@ Starting holders: kitchen Ivan, bathroom Jett, living and dining Demitrius.
 
 > Saturday was chosen, not specified. It is one field in Settings to change.
 
-### 4.4 Rotating zones (current holders as of the photo)
+### 4.4 Rotating zones (removed)
 
-| Zone | Currently assigned |
+The board named two standing assignments:
+
+| Zone | Named on the board |
 |---|---|
 | Kitchen sink / dishes | Jett |
 | Bathroom | Ivan |
 
-Zones rotate on a fixed cadence (default: weekly, Monday). Each week a zone advances to the next person in the rotation order.
+> Removed, 2026-09-14: the house dropped these once the deep clean (§4.3) was
+> added. The deep clean covers the same two areas and rotates across all three
+> housemates, so a second standing assignment naming one person was redundant.
+> Week-long zones remain a supported hold period (§7.6); there are simply none
+> defined. Day-to-day dishes are now covered only by the kitchen reminders.
 
 ### 4.5 Special tasks (one-off)
 
@@ -140,7 +146,8 @@ Priority: **P0** = must ship in v1. **P1** = should ship in v1 if cheap. **P2** 
 - Shows **this week** as the default. Navigate previous / next week.
 - Section "**Today**" pinned at top: every occurrence due today with its assignee and a done checkbox.
 - Section "**This week**": Monday through Sunday, each day listing its chores and assignees.
-- Section "**Zones this week**": Kitchen → name, Bathroom → name.
+- Section "**Zones this week**": any week-held chore and its holder. Hidden when
+  there are none, which is the current state.
 - Section "**Deep clean**": each area, who holds it this month, and the next date.
 - Section "**Special tasks**": open one-off tasks, sorted by due date, overdue first.
 - Section "**Reminders**": every group open, every item visible.
@@ -255,8 +262,8 @@ it.** For a week that is the familiar "away 4 of 7 days loses it"; for a month i
 is roughly a fortnight away. A holder skipped this way still keeps their place, so
 they take the next period rather than losing the turn.
 
-- **Zones** (kitchen sink, bathroom) hold for a week, one occurrence per week at
-  the week start.
+- **Zones** hold for a week, one occurrence per week at the week start. None are
+  defined right now; the kitchen sink and bathroom zones were removed (§4.4).
 - **Deep clean** (kitchen, bathroom, living and dining room) happens every two
   weeks but holds for a month, so the same person does every deep clean of their
   area that month before it moves on. With three areas and three housemates,
@@ -372,4 +379,5 @@ Not built: swap UI (§6.8), notifications (§10, P2).
 
 Added after the first build, at the house's request: special tasks (renamed from
 updates), reminders shown open rather than collapsed, and the deep clean with
-month-long holds and per-occurrence checklists (§4.3, §7.6).
+month-long holds and per-occurrence checklists (§4.3, §7.6). Street sweeping and
+the two named zones were removed (§4.2, §4.4).

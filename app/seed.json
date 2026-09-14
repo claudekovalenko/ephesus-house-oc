@@ -104,28 +104,6 @@
       "note": "Handles toward the street",
       "order": 3
     },
-    "kitchen": {
-      "name": "Kitchen sink and dishes",
-      "cadence": "weekly",
-      "mode": "rotate",
-      "anchorPerson": "jett",
-      "anchorDate": "2026-09-14",
-      "isZone": true,
-      "window": "",
-      "note": "",
-      "order": 1
-    },
-    "bathroom": {
-      "name": "Bathroom",
-      "cadence": "weekly",
-      "mode": "rotate",
-      "anchorPerson": "ivan",
-      "anchorDate": "2026-09-14",
-      "isZone": true,
-      "window": "",
-      "note": "",
-      "order": 2
-    },
     "deep-kitchen": {
       "day": 6,
       "cadence": "biweekly",
