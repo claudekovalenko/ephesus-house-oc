@@ -84,6 +84,34 @@
     return n;
   }
 
+  /* A holding period: the stretch one person owns a chore for. 'week' is a
+     zone (the bathroom is yours this week); 'month' is a standing
+     responsibility (the kitchen deep clean is yours this month, however many
+     times it comes round). */
+  function periodRange(iso, holdPeriod, weekStart) {
+    if (holdPeriod === 'month') {
+      var y = +iso.slice(0, 4), m = +iso.slice(5, 7);
+      var start = iso.slice(0, 7) + '-01';
+      var next = m === 12 ? (y + 1) + '-01-01' : y + '-' + pad(m + 1) + '-01';
+      return { start: start, days: diffDays(start, next) };
+    }
+    return { start: startOfWeek(iso, weekStart), days: 7 };
+  }
+
+  /* Available for a period if home for at least half of it. For a week that is
+     the same "away four days of seven loses it" rule zones have always used. */
+  function availableForPeriod(absences, personId, range) {
+    var away = 0;
+    for (var i = 0; i < range.days; i++) {
+      if (isAway(absences, personId, addDays(range.start, i))) away++;
+    }
+    return away * 2 <= range.days;
+  }
+
+  function holdOf(chore) {
+    return chore.holdPeriod || (chore.isZone ? 'week' : null);
+  }
+
   /* ---------- occurrence dates ---------- */
 
   /** Every date this chore lands on, from its anchor through `through`. */
@@ -118,15 +146,6 @@
   }
 
   /* ---------- assignment ---------- */
-
-  function homeTestFor(chore, ctx, iso) {
-    if (chore.isZone) {
-      // A zone holder keeps the week unless they are gone for most of it.
-      var ws = startOfWeek(iso, ctx.weekStart);
-      return function (p) { return awayDaysInWeek(ctx.absences, p, ws) < 4; };
-    }
-    return function (p) { return !isAway(ctx.absences, p, iso); };
-  }
 
   function coversSince(log, iso, windowDays) {
     if (!log) return 0;
@@ -184,42 +203,66 @@
     var ptr = startPointer(chore, ctx, order);
     var coverLog = {};
 
-    for (i = 0; i < dates.length; i++) {
-      var iso = dates[i];
-      var home = homeTestFor(chore, ctx, iso);
+    /* One turn. `homeFn` decides who can take it; `at` is the date the cover is
+       logged against. The pointer advances ONLY when the person it points at
+       takes the turn, so anyone skipped keeps their place in line. */
+    function takeTurn(homeFn, at) {
       var upNext = order[ptr];
-
-      if (home(upNext)) {
-        result[iso] = { assignee: upNext, coveringFor: null };
-        ptr = (ptr + 1) % n;                       // they took it: advance
-        continue;
+      if (homeFn(upNext)) {
+        ptr = (ptr + 1) % n;
+        return { assignee: upNext, coveringFor: null };
       }
 
       var candidates = [];
       for (var k = 1; k < n; k++) {
         var p = order[(ptr + k) % n];
-        if (home(p)) candidates.push(p);
+        if (homeFn(p)) candidates.push(p);
       }
+      if (!candidates.length) return { assignee: null, unassigned: true, awayPerson: upNext };
 
-      if (!candidates.length) {
-        result[iso] = { assignee: null, unassigned: true, awayPerson: upNext };
-        continue;                                   // pointer holds
-      }
-
-      var pick = candidates[0];
+      var chosen = candidates[0];
       if (ctx.balanceCovers) {
         var fewest = Infinity;
         for (var c = 0; c < candidates.length; c++) {
-          var cnt = coversSince(coverLog[candidates[c]], iso, 56);
-          if (cnt < fewest) { fewest = cnt; pick = candidates[c]; }
+          var cnt = coversSince(coverLog[candidates[c]], at, 56);
+          if (cnt < fewest) { fewest = cnt; chosen = candidates[c]; }
         }
       }
-
-      result[iso] = { assignee: pick, coveringFor: upNext };
-      (coverLog[pick] || (coverLog[pick] = [])).push(iso);
-      // pointer deliberately unchanged — the person skipped keeps their place
+      (coverLog[chosen] || (coverLog[chosen] = [])).push(at);
+      return { assignee: chosen, coveringFor: upNext };
     }
 
+    var hold = holdOf(chore);
+
+    if (hold) {
+      // Group the occurrences into holding periods; one turn per period, and
+      // every occurrence inside it belongs to whoever holds that period.
+      var groups = [], byKey = {};
+      for (i = 0; i < dates.length; i++) {
+        var range = periodRange(dates[i], hold, ctx.weekStart);
+        if (!byKey[range.start]) {
+          byKey[range.start] = { range: range, dates: [] };
+          groups.push(byKey[range.start]);
+        }
+        byKey[range.start].dates.push(dates[i]);
+      }
+      groups.forEach(function (g) {
+        var entry = takeTurn(function (p) {
+          return availableForPeriod(ctx.absences, p, g.range);
+        }, g.range.start);
+        g.dates.forEach(function (d) { result[d] = entry; });
+      });
+      return result;
+    }
+
+    for (i = 0; i < dates.length; i++) {
+      result[dates[i]] = takeTurn(
+        (function (iso) {
+          return function (p) { return !isAway(ctx.absences, p, iso); };
+        })(dates[i]),
+        dates[i]
+      );
+    }
     return result;
   }
 
@@ -308,8 +351,40 @@
       shared: !!entry.shared,
       away: !!entry.away,
       doneAt: rec ? rec.doneAt : null,
-      doneBy: rec ? rec.doneBy : null
+      doneBy: rec ? rec.doneBy : null,
+      checked: (rec && rec.checked) || {}
     };
+  }
+
+  /**
+   * Who holds each month-long responsibility for the month containing
+   * `onDate`, and when it next comes round. Drives the deep clean panel.
+   */
+  function heldThisMonth(state, onDate) {
+    var month = onDate.slice(0, 7);
+    var all = assignAll(state, addDays(month + '-01', 75));
+    var out = [];
+
+    state.chores.forEach(function (ch) {
+      if (ch.archived || holdOf(ch) !== 'month') return;
+      var byDate = all[ch.id] || {};
+      var dates = Object.keys(byDate).sort();
+      var inMonth = dates.filter(function (d) { return d.slice(0, 7) === month; });
+      var upcoming = dates.filter(function (d) { return d >= onDate; });
+      var entry = inMonth.length ? byDate[inMonth[0]] : (upcoming.length ? byDate[upcoming[0]] : null);
+      if (!entry) return;
+      out.push({
+        chore: ch,
+        assignee: entry.assignee,
+        coveringFor: entry.coveringFor || null,
+        unassigned: !!entry.unassigned,
+        dates: inMonth,
+        next: upcoming.length ? upcoming[0] : null
+      });
+    });
+
+    out.sort(function (a, b) { return (a.chore.order || 0) - (b.chore.order || 0); });
+    return out;
   }
 
   /* ---------- fairness ---------- */
@@ -409,6 +484,8 @@
     diffDays: diffDays, startOfWeek: startOfWeek, firstOnOrAfter: firstOnOrAfter,
     nthWeekdayOfMonth: nthWeekdayOfMonth, today: today,
     isAway: isAway, awayDaysInWeek: awayDaysInWeek,
+    periodRange: periodRange, availableForPeriod: availableForPeriod, holdOf: holdOf,
+    heldThisMonth: heldThisMonth,
     occurrenceDates: occurrenceDates, assignChore: assignChore, assignAll: assignAll,
     buildWeek: buildWeek, occurrenceKey: occurrenceKey,
     tally: tally, isBalanced: isBalanced,

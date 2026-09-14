@@ -29,6 +29,10 @@
   function prettyFull(iso) {
     return DOW_SHORT[R.dayOfWeek(iso)] + ' ' + pretty(iso);
   }
+  var MON_LONG = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+  function monthName(iso) { return MON_LONG[+iso.slice(5, 7) - 1]; }
+
   function uid(prefix) {
     return prefix + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   }
@@ -214,6 +218,7 @@
     state: null,
     draft: {},
     editingChore: null,
+    openItems: {},
     flashMsg: null,
 
     boot: function () {
@@ -371,6 +376,30 @@
           }).join('') + '</div></div>';
       }
 
+      /* month-long responsibilities */
+      var held = R.heldThisMonth(s, today);
+      if (held.length) {
+        out += '<div class="sec"><div class="sec-head"><h2>Deep clean</h2>' +
+          '<span class="aside">' + monthName(today) + '</span></div><div class="panel">' +
+          held.map(function (x) {
+            var hc = x.assignee ? colorOf(s, x.assignee) : 'var(--muted)';
+            var bits = [];
+            if (x.next) bits.push('next ' + prettyFull(x.next));
+            else if (x.dates.length) bits.push('none left this month');
+            if ((x.chore.checklist || []).length) bits.push(x.chore.checklist.length + ' jobs');
+            if (x.coveringFor) bits.push('covering ' + nameOf(s, x.coveringFor));
+            return '<div class="deep-row" style="--c:' + h(hc) + '">' +
+              '<div class="deep-main"><div class="deep-name">' + h(x.chore.name) + '</div>' +
+              '<div class="deep-meta">' + h(bits.join(' \u00b7 ')) + '</div></div>' +
+              (x.assignee
+                ? '<span class="who"><span class="swatch"></span>' + h(nameOf(s, x.assignee)) + '</span>'
+                : '<span class="who nobody">unassigned</span>') +
+              '</div>';
+          }).join('') + '</div>' +
+          '<p class="hint" style="margin-top:8px">Whoever holds an area keeps it for the ' +
+          'whole month, then it moves on.</p></div>';
+      }
+
       /* the week */
       var mineOnly = this.mineOnly && this.me;
       out += '<div class="sec"><div class="sec-head"><h2>The week</h2>' +
@@ -469,13 +498,36 @@
           ? '<span class="who"><span class="swatch"></span>' + h(nameOf(s, item.assignee)) + '</span>'
           : '<span class="who nobody">unassigned</span>';
 
+      var list = ch.checklist || [];
+      var sub = '';
+      if (list.length) {
+        var ticked = 0;
+        for (var n = 0; n < list.length; n++) if (item.checked[n]) ticked++;
+        var isOpen = !!this.openItems[item.key];
+        sub = '<div class="sublist">' +
+          '<button class="sub-toggle" data-act="expand" data-key="' + h(item.key) +
+          '" aria-expanded="' + (isOpen ? 'true' : 'false') + '">' +
+          ticked + ' of ' + list.length + ' done' +
+          '<span class="caret">' + (isOpen ? '\u25be' : '\u25b8') + '</span></button>' +
+          (isOpen
+            ? '<ul class="checklist">' + list.map(function (txt, n2) {
+                var on = !!item.checked[n2];
+                return '<li><button class="tick tiny' + (on ? ' on' : '') +
+                  '" data-act="check" data-key="' + h(item.key) + '" data-i="' + n2 +
+                  '" aria-pressed="' + (on ? 'true' : 'false') + '" aria-label="' + h(txt) + '">\u2713</button>' +
+                  '<span' + (on ? ' class="struck"' : '') + '>' + h(txt) + '</span></li>';
+              }).join('') + '</ul>'
+            : '') +
+          '</div>';
+      }
+
       return '<div class="item' + (item.doneAt ? ' is-done' : '') + '" style="--c:' + h(c) + '">' +
         '<button class="tick' + (item.doneAt ? ' on' : '') + '" data-act="tick" data-key="' + h(item.key) +
         '" aria-pressed="' + (item.doneAt ? 'true' : 'false') +
         '" aria-label="' + (item.doneAt ? 'Mark not done' : 'Mark done') + ': ' + h(ch.name) + '">✓</button>' +
         '<div class="item-main"><div class="item-name">' + h(ch.name) + '</div>' +
         (ch.note ? '<div class="item-note">' + h(ch.note) + '</div>' : '') +
-        (meta ? '<div class="item-meta">' + meta + '</div>' : '') + '</div>' +
+        (meta ? '<div class="item-meta">' + meta + '</div>' : '') + sub + '</div>' +
         who + '</div>';
     },
 
@@ -776,13 +828,17 @@
     choreRowHTML: function (c) {
       var s = this.state;
       var open = this.editingChore === c.id;
+      var hold = R.holdOf(c);
       var desc = c.isZone
         ? 'Zone · rotates weekly'
         : DOW_LONG[c.day] + (c.cadence === 'biweekly' ? ' · every other week'
             : c.cadence === 'monthly' ? ' · monthly' : ' · weekly') +
           (c.window ? ' · ' + c.window : '');
+      if (!c.isZone && hold === 'month') desc += ' · held for the month';
+      if (!c.isZone && hold === 'week') desc += ' · held for the week';
       if (c.mode === 'fixed') desc += ' · always ' + nameOf(s, c.fixedAssignee);
       if (c.mode === 'everyone') desc += ' · everyone';
+      if ((c.checklist || []).length) desc += ' · ' + c.checklist.length + ' jobs';
 
       var out = '<div class="chore-row"><div class="chore-head">' +
         '<span class="nm">' + h(c.name) + '</span>' +
@@ -833,9 +889,28 @@
               '<p class="hint">Resets this chore’s place in the rotation from ' +
               pretty(c.anchorDate) + '.</p></div>'
             : '') +
+          '<div class="field"><label for="ch-hold">One person holds it for</label>' +
+          '<select id="ch-hold" data-chore="' + h(c.id) + '" data-f="holdPeriod"' +
+          (c.isZone ? ' disabled' : '') + '>' +
+          [['', 'Just that one time'], ['week', 'The whole week'], ['month', 'The whole month']]
+            .map(function (o) {
+              return '<option value="' + o[0] + '"' + ((hold || '') === o[0] ? ' selected' : '') +
+                '>' + o[1] + '</option>';
+            }).join('') + '</select>' +
+          '<p class="hint">Held for a month means the same person does every one of these ' +
+          'that comes round before it moves on.</p></div>' +
           '<div class="field"><label for="ch-note">Note</label>' +
           '<input type="text" id="ch-note" data-chore="' + h(c.id) + '" data-f="note" value="' +
           h(c.note || '') + '" placeholder="Handles toward the street"></div>' +
+          '<div class="field"><label>What the job involves</label>' +
+          '<ul class="joblist">' + (c.checklist || []).map(function (t, ti) {
+            return '<li><span style="flex:1">' + h(t) + '</span>' +
+              '<button class="u-del" data-act="cldel" data-id="' + h(c.id) + '" data-i="' + ti +
+              '" aria-label="Remove this job">✕</button></li>';
+          }).join('') + '</ul>' +
+          '<div class="rem-add"><input type="text" id="cl-add-' + h(c.id) + '" data-draft="cl' +
+          h(c.id) + '" placeholder="Add a job" value="' + h(this.draft['cl' + c.id] || '') + '">' +
+          '<button class="btn sm" data-act="cladd" data-id="' + h(c.id) + '">Add</button></div></div>' +
           '<div class="btn-row"><button class="btn sm danger" data-act="chdel" data-id="' +
           h(c.id) + '">Remove this chore</button></div>' +
           '</div>';
@@ -859,6 +934,7 @@
       if (t.dataset && t.dataset.chore) {
         var id = t.dataset.chore, f = t.dataset.f;
         var val = f === 'day' ? +t.value : t.value;
+        if (f === 'holdPeriod' && val === '') val = null;
         var patch = {};
         patch[f] = val;
         if (f === 'anchorPerson') {
@@ -924,19 +1000,55 @@
         tick: function () {
           var key = btn.dataset.key;
           var rec = s.occurrences[key];
+          var parts = key.split('__');
+          var chore = s.chores.filter(function (c) { return c.id === parts[0]; })[0];
+          var list = (chore && chore.checklist) || [];
+
           if (rec && rec.doneAt) {
             var rest = Object.assign({}, rec);
             delete rest.doneAt; delete rest.doneBy;
-            if (Object.keys(rest).length) Store.set('occurrences/' + key, rest);
+            if (list.length) rest.checked = {};      // ticking off clears the checklist too
+            var meaningful = Object.keys(rest).filter(function (k) {
+              return k !== 'choreId' && k !== 'date' &&
+                !(k === 'checked' && !Object.keys(rest.checked || {}).length);
+            });
+            if (meaningful.length) Store.set('occurrences/' + key, rest);
             else Store.remove('occurrences/' + key);
           } else {
-            var parts = key.split('__');
+            var all = {};
+            for (var n = 0; n < list.length; n++) all[n] = true;
             Store.set('occurrences/' + key, Object.assign({}, rec, {
               choreId: parts[0], date: parts[1],
+              checked: list.length ? all : (rec && rec.checked) || {},
               doneAt: new Date().toISOString(),
-              doneBy: this.me || (rec && rec.assignee) || null
+              doneBy: this.me || null
             }));
           }
+        },
+
+        expand: function () {
+          var key = btn.dataset.key;
+          this.openItems[key] = !this.openItems[key];
+          this.render();
+        },
+
+        check: function () {
+          var key = btn.dataset.key, idx = btn.dataset.i;
+          var rec = s.occurrences[key] || {};
+          var parts = key.split('__');
+          var chore = s.chores.filter(function (c) { return c.id === parts[0]; })[0];
+          var total = ((chore && chore.checklist) || []).length;
+
+          var checked = Object.assign({}, rec.checked || {});
+          if (checked[idx]) delete checked[idx]; else checked[idx] = true;
+
+          // The occurrence is done exactly when every job on it is done.
+          var complete = total > 0 && Object.keys(checked).length >= total;
+          Store.set('occurrences/' + key, Object.assign({}, rec, {
+            choreId: parts[0], date: parts[1], checked: checked,
+            doneAt: complete ? (rec.doneAt || new Date().toISOString()) : null,
+            doneBy: complete ? (rec.doneBy || this.me || null) : null
+          }));
         },
 
         uadd: function () {
@@ -1046,11 +1158,30 @@
             name: 'New chore', day: 1, cadence: 'weekly', mode: 'rotate',
             anchorPerson: s.rotation[0] || null,
             anchorDate: R.startOfWeek(today, s.weekStart),
-            isZone: false, note: '', window: '',
+            isZone: false, note: '', window: '', holdPeriod: null, checklist: [],
             order: s.chores.length + 1
           });
           this.editingChore = id;
           this.render();
+        },
+
+        cladd: function () {
+          var id = btn.dataset.id;
+          var text = (this.draft['cl' + id] || '').trim();
+          if (!text) return;
+          var chore = s.chores.filter(function (c) { return c.id === id; })[0];
+          if (!chore) return;
+          this.draft['cl' + id] = '';
+          Store.merge('chores/' + id, { checklist: (chore.checklist || []).concat([text]) });
+        },
+
+        cldel: function () {
+          var id = btn.dataset.id;
+          var chore = s.chores.filter(function (c) { return c.id === id; })[0];
+          if (!chore) return;
+          var next = (chore.checklist || []).slice();
+          next.splice(+btn.dataset.i, 1);
+          Store.merge('chores/' + id, { checklist: next });
         },
 
         chdel: function () {

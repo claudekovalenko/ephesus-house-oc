@@ -57,7 +57,20 @@ This is the initial data the app ships with. Everything here must be editable in
 | Thursday | Bring in cans | In the morning. Handles toward the street. |
 | Friday | *(see reminders)* | Street sweeping — see §4.5. It is a standing reminder, not an assigned turn. |
 
-### 4.3 Rotating zones (current holders as of the photo)
+### 4.3 Deep clean (added 2026-09-14, not from the board)
+
+Every two weeks, on Saturday. Each area is held by one person for a whole month.
+Starting holders: kitchen Ivan, bathroom Jett, living and dining Demitrius.
+
+| Area | Jobs |
+|---|---|
+| Kitchen | Sweep and mop the floor · clear the counters and clean them fully, under everything · clean the inside of the sink · wipe down the tables · clean the stove |
+| Bathroom | Clean the shower · clean the shower door · clean the toilet, and get behind it · clean the sink and counter · sweep and mop the floor |
+| Living and dining room | Dust · dust the fans · vacuum · wipe down the tables |
+
+> Saturday was chosen, not specified. It is one field in Settings to change.
+
+### 4.4 Rotating zones (current holders as of the photo)
 
 | Zone | Currently assigned |
 |---|---|
@@ -66,7 +79,7 @@ This is the initial data the app ships with. Everything here must be editable in
 
 Zones rotate on a fixed cadence (default: weekly, Monday). Each week a zone advances to the next person in the rotation order.
 
-### 4.4 Special tasks (one-off)
+### 4.5 Special tasks (one-off)
 
 | Task | Due | Notes |
 |---|---|---|
@@ -74,7 +87,7 @@ Zones rotate on a fixed cadence (default: weekly, Monday). Each week a zone adva
 | Planters build | By the 25th | |
 | Cardboard break down | — | All foam in one box |
 
-### 4.5 Reminders (standing house rules, not assignable)
+### 4.6 Reminders (standing house rules, not assignable)
 
 Transcribed from the second photo of the board, which shows more than the first.
 
@@ -111,7 +124,8 @@ Transcribed from the second photo of the board, which shows more than the first.
 | **Housemate** | A person in the rotation. Has a name, a color, and an active flag. |
 | **Rotation** | The ordered list of housemates. Order is editable. |
 | **Chore** | A recurring, assignable job. Has a schedule (day of week + optional time window), a description, and an assignment mode. |
-| **Zone** | A chore whose assignment lasts a whole period (e.g., "Bathroom for the week") rather than a single day. Modeled as a chore with `cadence = weekly` and `assignment_mode = rotate`. |
+| **Zone** | A chore whose assignment lasts a whole period (e.g., "Bathroom for the week") rather than a single day. Modeled as a chore with `hold_period = week`. |
+| **Hold period** | How long one person owns a chore before it moves on: each occurrence (the default), a week, or a month. Independent of how often the chore comes round. A deep clean happens every two weeks but is held for a month, so the same person does both of that month's. |
 | **Special task** | A one-off task with an optional due date and an optional assignee. Not part of the rotation unless the creator asks the app to "assign to whoever is next." Called "Updates" on the whiteboard and in the first draft of this document; the house renamed it. The database collection is still `updates`. |
 | **Reminder** | Static text grouped by area. Never assigned, never completed. Just rules. |
 | **Absence** | A date range during which a housemate is not home. The core "exception" mechanism. |
@@ -127,6 +141,7 @@ Priority: **P0** = must ship in v1. **P1** = should ship in v1 if cheap. **P2** 
 - Section "**Today**" pinned at top: every occurrence due today with its assignee and a done checkbox.
 - Section "**This week**": Monday through Sunday, each day listing its chores and assignees.
 - Section "**Zones this week**": Kitchen → name, Bathroom → name.
+- Section "**Deep clean**": each area, who holds it this month, and the next date.
 - Section "**Special tasks**": open one-off tasks, sorted by due date, overdue first.
 - Section "**Reminders**": every group open, every item visible.
 - A person filter ("just show me mine") that persists on the device.
@@ -229,9 +244,30 @@ Note on Sept 14 the pointer stays on Jett after Demitrius covers. Jett takes it 
 
 Pure skip-and-hold is fair over time but can leave one person with several covers in a row if the same neighbor in the rotation keeps being absent. When the walk in step 2 has to skip someone, and more than one person is home, prefer the home person with the **fewest covers in the trailing 8 weeks** rather than strictly the next in order. Ties go to rotation order. This is opt-in in settings ("Balance covers") and off by default so the v1 behavior is easy to reason about.
 
-### 7.6 Zones
+### 7.6 Held periods (zones and month-long responsibilities)
 
-Zones (Kitchen, Bathroom) use the identical algorithm with one occurrence per week, anchored to the week start. If the holder is away for **more than half** the week (4+ of 7 days), the zone is reassigned for that week. If away for less, they keep it; the board shows the away days so the house can nudge.
+When a chore has a hold period, its occurrences are grouped into periods and the
+pointer walk in §7.2 runs **once per period**, not once per occurrence. Everything
+inside that period belongs to whoever holds it.
+
+Availability over a period is one rule: **available if home for at least half of
+it.** For a week that is the familiar "away 4 of 7 days loses it"; for a month it
+is roughly a fortnight away. A holder skipped this way still keeps their place, so
+they take the next period rather than losing the turn.
+
+- **Zones** (kitchen sink, bathroom) hold for a week, one occurrence per week at
+  the week start.
+- **Deep clean** (kitchen, bathroom, living and dining room) happens every two
+  weeks but holds for a month, so the same person does every deep clean of their
+  area that month before it moves on. With three areas and three housemates,
+  everyone holds exactly one area at a time.
+
+### 7.6b Checklists
+
+A chore may carry a checklist of the jobs it involves. Ticks are stored per
+occurrence, not per chore, so last fortnight's ticks do not carry over. An
+occurrence is done exactly when every job on it is ticked, and ticking the
+occurrence itself ticks or clears the whole list.
 
 ### 7.7 Edge cases
 
@@ -247,9 +283,10 @@ Zones (Kitchen, Bathroom) use the identical algorithm with one occurrence per we
 Housemate   { id, name, color, active, sort_order }
 Chore       { id, name, description, cadence, day_of_week[], time_start?, time_end?,
               assignment_mode (rotate|fixed|everyone), fixed_assignee_id?,
-              rotation_pointer_person_id, pointer_anchor_date, is_zone, archived }
+              rotation_pointer_person_id, pointer_anchor_date,
+              hold_period (null|week|month), checklist[], is_zone, archived }
 Occurrence  { id, chore_id, date, assigned_to_id?, covering_for_id?,
-              done_at?, done_by_id?, note? }
+              done_at?, done_by_id?, checked{index: true}, note? }
               -- materialized only when marked done or manually overridden;
               -- otherwise computed on read
 Absence     { id, housemate_id, start_date, end_date, note? }
@@ -332,3 +369,7 @@ whether updates should ever auto-rotate. All three are single settings to change
 once the house has lived with the defaults for a few weeks.
 
 Not built: swap UI (§6.8), notifications (§10, P2).
+
+Added after the first build, at the house's request: special tasks (renamed from
+updates), reminders shown open rather than collapsed, and the deep clean with
+month-long holds and per-occurrence checklists (§4.3, §7.6).

@@ -322,3 +322,92 @@ test('nextInRotation skips whoever is away on the due date', () => {
   assert.strictEqual(R.nextInRotation(state, '2026-09-25'), DEM);
   assert.strictEqual(R.nextInRotation(state, '2026-10-05'), JETT);
 });
+
+/* ---------- month-long responsibilities (deep clean) ---------- */
+
+const deep = (over) => Object.assign({
+  id: 'deep-kitchen', name: 'Deep clean the kitchen', day: 6,
+  cadence: 'biweekly', mode: 'rotate', holdPeriod: 'month',
+  anchorPerson: IVAN, anchorDate: '2026-09-14', isZone: false, order: 1
+}, over || {});
+
+test('a month-held chore keeps the same person for every occurrence that month', () => {
+  const a = R.assignAll(baseState({ chores: [deep()] }), '2026-10-31')['deep-kitchen'];
+  assert.deepStrictEqual(Object.keys(a).sort(),
+    ['2026-09-19', '2026-10-03', '2026-10-17', '2026-10-31']);
+  assert.strictEqual(a['2026-09-19'].assignee, IVAN);            // September
+  assert.strictEqual(a['2026-10-03'].assignee, JETT);            // October, all three
+  assert.strictEqual(a['2026-10-17'].assignee, JETT);
+  assert.strictEqual(a['2026-10-31'].assignee, JETT);
+});
+
+test('a month-held chore hands over at the month boundary, not per occurrence', () => {
+  const a = R.assignAll(baseState({ chores: [deep()] }), '2026-12-31')['deep-kitchen'];
+  const holder = (m) => Object.keys(a).filter((d) => d.startsWith(m)).map((d) => a[d].assignee);
+  assert.deepStrictEqual(new Set(holder('2026-09')), new Set([IVAN]));
+  assert.deepStrictEqual(new Set(holder('2026-10')), new Set([JETT]));
+  assert.deepStrictEqual(new Set(holder('2026-11')), new Set([DEM]));
+  assert.deepStrictEqual(new Set(holder('2026-12')), new Set([IVAN]));
+});
+
+test('three month-held areas anchored on three people give everyone exactly one', () => {
+  const state = baseState({
+    chores: [
+      deep({ id: 'deep-kitchen', anchorPerson: IVAN }),
+      deep({ id: 'deep-bathroom', anchorPerson: JETT }),
+      deep({ id: 'deep-living', anchorPerson: DEM })
+    ]
+  });
+  ['2026-09', '2026-10', '2026-11'].forEach((month) => {
+    const held = R.heldThisMonth(state, month + '-15').map((x) => x.assignee);
+    assert.strictEqual(new Set(held).size, 3, `${month} doubled someone up: ${held}`);
+  });
+});
+
+test('away for most of the month loses that month but not the turn', () => {
+  const state = baseState({
+    chores: [deep()],
+    absences: [{ housemateId: IVAN, start: '2026-09-01', end: '2026-09-24' }]
+  });
+  const a = R.assignAll(state, '2026-10-31')['deep-kitchen'];
+  assert.strictEqual(a['2026-09-19'].assignee, JETT);
+  assert.strictEqual(a['2026-09-19'].coveringFor, IVAN);
+  assert.strictEqual(a['2026-10-03'].assignee, IVAN);   // back, and still up next
+});
+
+test('away for under half the month keeps it', () => {
+  const state = baseState({
+    chores: [deep()],
+    absences: [{ housemateId: IVAN, start: '2026-09-14', end: '2026-09-21' }]
+  });
+  assert.strictEqual(R.assignAll(state, '2026-09-19')['deep-kitchen']['2026-09-19'].assignee, IVAN);
+});
+
+test('heldThisMonth reports the holder and the next date', () => {
+  const held = R.heldThisMonth(baseState({ chores: [deep()] }), '2026-10-05');
+  assert.strictEqual(held.length, 1);
+  assert.strictEqual(held[0].assignee, JETT);
+  assert.deepStrictEqual(held[0].dates, ['2026-10-03', '2026-10-17', '2026-10-31']);
+  assert.strictEqual(held[0].next, '2026-10-17');
+});
+
+test('a week-held chore is still a zone, whichever field says so', () => {
+  const viaZone = baseState({ chores: [bathroom()] });
+  const viaHold = baseState({
+    chores: [Object.assign({}, bathroom(), { isZone: true, holdPeriod: 'week' })]
+  });
+  assert.deepStrictEqual(
+    R.assignAll(viaZone, '2026-10-05').bathroom,
+    R.assignAll(viaHold, '2026-10-05').bathroom
+  );
+});
+
+test('a month-held chore carries its checklist ticks onto the occurrence', () => {
+  const state = baseState({
+    chores: [deep({ checklist: ['Sweep and mop the floor', 'Clean the stove'] })],
+    occurrences: { 'deep-kitchen__2026-09-19': { checked: { 0: true } } }
+  });
+  const item = R.buildWeek(state, '2026-09-19').days[5].items[0];
+  assert.strictEqual(item.chore.checklist.length, 2);
+  assert.deepStrictEqual(item.checked, { 0: true });
+});

@@ -125,6 +125,65 @@
       "window": "",
       "note": "",
       "order": 2
+    },
+    "deep-kitchen": {
+      "day": 6,
+      "cadence": "biweekly",
+      "mode": "rotate",
+      "holdPeriod": "month",
+      "anchorDate": "2026-09-14",
+      "isZone": false,
+      "window": "",
+      "note": "",
+      "name": "Deep clean the kitchen",
+      "anchorPerson": "ivan",
+      "order": 10,
+      "checklist": [
+        "Sweep and mop the floor",
+        "Clear the counters and clean them fully, under everything",
+        "Clean the inside of the sink",
+        "Wipe down the tables",
+        "Clean the stove"
+      ]
+    },
+    "deep-bathroom": {
+      "day": 6,
+      "cadence": "biweekly",
+      "mode": "rotate",
+      "holdPeriod": "month",
+      "anchorDate": "2026-09-14",
+      "isZone": false,
+      "window": "",
+      "note": "",
+      "name": "Deep clean the bathroom",
+      "anchorPerson": "jett",
+      "order": 11,
+      "checklist": [
+        "Clean the shower",
+        "Clean the shower door",
+        "Clean the toilet, and get behind it",
+        "Clean the sink and counter",
+        "Sweep and mop the floor"
+      ]
+    },
+    "deep-living": {
+      "day": 6,
+      "cadence": "biweekly",
+      "mode": "rotate",
+      "holdPeriod": "month",
+      "anchorDate": "2026-09-14",
+      "isZone": false,
+      "window": "",
+      "note": "",
+      "name": "Deep clean the living and dining room",
+      "anchorPerson": "demitrius",
+      "order": 12,
+      "checklist": [
+        "Dust",
+        "Dust the fans",
+        "Vacuum",
+        "Wipe down the tables"
+      ]
     }
   },
   "updates": {

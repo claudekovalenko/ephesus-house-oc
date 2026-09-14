@@ -320,6 +320,41 @@ select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
 }
 .rem-edit li { padding-left: 0; display: flex; gap: 8px; align-items: flex-start; }
 .rem-edit li::before { display: none; }
+.sublist { margin-top: 7px; }
+.sub-toggle {
+  border: 0; background: none; padding: 2px 0;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--mono); font-size: .6875rem; color: var(--marker); font-weight: 500;
+}
+.sub-toggle .caret { font-size: .625rem; }
+.checklist {
+  margin: 8px 0 2px; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.checklist li { display: flex; align-items: flex-start; gap: 8px; font-size: .8125rem;
+  color: var(--ink-soft); line-height: 1.4; }
+.checklist .struck { text-decoration: line-through; color: var(--muted); }
+.tick.tiny { width: 19px; height: 19px; border-radius: 6px; font-size: .625rem; margin-top: 0; }
+
+.deep-row {
+  --c: var(--muted);
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px 12px 12px;
+  border-left: 3px solid var(--c);
+  border-bottom: 1px solid var(--line-soft);
+}
+.deep-row:last-child { border-bottom: 0; }
+.deep-main { flex: 1; min-width: 0; }
+.deep-name { font-weight: 500; letter-spacing: -.005em; }
+.deep-meta { margin-top: 3px; font-family: var(--mono); font-size: .6875rem; color: var(--muted); }
+
+.joblist {
+  margin: 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.joblist li { display: flex; gap: 8px; align-items: flex-start; font-size: .8125rem;
+  color: var(--ink-soft); }
+
 .rem-add { display: flex; gap: 8px; margin-top: 11px; }
 .rem-add input { flex: 1; }
 .rem-add .btn { flex: none; }
