@@ -6,7 +6,12 @@ It answers one question the whiteboard could not: **who is on what this week,
 given who is actually home.** Mark someone away and the board reassigns their
 turns and keeps the rotation fair, with no erasing and rewriting.
 
-- **Live app:** https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN
+- **Live app (shared):** https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN
+  — this is the one to use. All three housemates see the same board.
+- **GitHub Pages copy:** https://claudekovalenko.github.io/ephesus-house-oc/
+  — same app, but **each device gets its own private board.** Shared storage is
+  only available inside the Claude viewer, so the Pages copy is a demo, not the
+  house board. It says so on screen.
 - **Product requirements:** [`docs/PRD.md`](docs/PRD.md)
 - **The original board:** [`docs/assets/whiteboard-2026-09.jpg`](docs/assets/whiteboard-2026-09.jpg)
   and [the reminders corner](docs/assets/whiteboard-2026-09-reminders.jpg)

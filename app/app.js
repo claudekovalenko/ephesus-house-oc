@@ -457,7 +457,9 @@
 
       if (!Store.shared) {
         out += '<div class="banner"><b>This device only.</b> ' +
-          'Shared storage is not available in this view, so changes stay in this browser.</div>';
+          'Nothing here reaches the other phones \u2014 changes stay in this browser. ' +
+          'The board the whole house shares lives at ' +
+          '<a href="https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN">claude.ai</a>.</div>';
       }
 
       return out;

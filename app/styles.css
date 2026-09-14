@@ -533,6 +533,7 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: .7; }
   display: flex; gap: 9px; align-items: flex-start;
 }
 .banner b { color: var(--ink); font-weight: 600; }
+.banner a { color: var(--marker); font-weight: 600; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
