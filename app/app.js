@@ -42,36 +42,120 @@
 
   /* ================= store ================= */
 
-  /* Two backends behind one write API: the shared realtime store when the
-     viewer can run it, this browser alone when they cannot. */
+  /* The shared board, over PostgREST. One row per document, keyed by
+     "collection/id", which is the same shape the rest of the app already
+     speaks. No client library: a handful of fetches is less to go wrong than
+     a CDN dependency, and a five-second poll is invisible on a chore board. */
+  var Cloud = {
+    cfg: null,
+
+    ok: function () { return !!(this.cfg && this.cfg.url && this.cfg.key); },
+
+    base: function () {
+      return this.cfg.url + '/rest/v1/' + (this.cfg.table || 'chores_docs');
+    },
+
+    head: function (extra) {
+      return Object.assign({
+        apikey: this.cfg.key,
+        Authorization: 'Bearer ' + this.cfg.key,
+        'Content-Type': 'application/json'
+      }, extra || {});
+    },
+
+    all: function () {
+      return fetch(this.base() + '?select=path,data', {
+        headers: this.head(), cache: 'no-store'
+      }).then(function (res) {
+        if (!res.ok) throw new Error('read ' + res.status);
+        return res.json();
+      });
+    },
+
+    put: function (path, data) {
+      var cut = path.indexOf('/');
+      return fetch(this.base() + '?on_conflict=path', {
+        method: 'POST',
+        headers: this.head({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
+        body: JSON.stringify({
+          path: path,
+          collection: path.slice(0, cut),
+          doc_id: path.slice(cut + 1),
+          data: data
+        })
+      }).then(function (res) { if (!res.ok) throw new Error('write ' + res.status); });
+    },
+
+    del: function (path) {
+      return fetch(this.base() + '?path=eq.' + encodeURIComponent(path), {
+        method: 'DELETE',
+        headers: this.head({ Prefer: 'return=minimal' })
+      }).then(function (res) { if (!res.ok) throw new Error('delete ' + res.status); });
+    }
+  };
+
   var Store = {
-    db: null,
     raw: { config: {}, chores: {}, absences: {}, updates: {}, occurrences: {} },
     ready: false,
     shared: false,
+    offline: false,
     snapshotOf: null,
+    pending: 0,
     onChange: function () {},
 
     start: function (onChange) {
       this.onChange = onChange;
+
+      // Paint from whatever this browser saw last, so the board is never blank
+      // while the first request is in the air.
       var cached = safeLocal(function () { return JSON.parse(localStorage.getItem(CACHE_KEY)); }, null);
-      if (cached) { this.raw = cached; this.ready = true; this.onChange(); }
+      if (cached && cached.config) { this.raw = cached; this.ready = true; this.onChange(); }
 
-      var self = this;
-      var use = window.claude && window.claude.use;
-      if (!use) { this.startLocal(); return; }
-
-      window.claude.use('db').then(function (db) {
-        if (!db) { self.startLocal(); return; }
-        self.db = db;
-        self.shared = true;
-        self.subscribe();
-      }).catch(function () { self.startLocal(); });
+      Cloud.cfg = window.EPHESUS || null;
+      if (Cloud.ok()) this.startCloud();
+      else this.startLocal();
     },
 
-    /* No shared store in this view. Use whatever this browser already holds;
-       failing that, boot from the snapshot of the house board shipped with the
-       page, so the board is never empty on a first visit. */
+    startCloud: function () {
+      var self = this;
+      this.shared = true;
+      this.pull();
+
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') self.pull();
+      });
+      setInterval(function () {
+        if (document.visibilityState === 'visible') self.pull();
+      }, (Cloud.cfg && Cloud.cfg.pollMs) || 5000);
+    },
+
+    /** Replace local state with the board as the server has it. */
+    pull: function () {
+      var self = this;
+      if (this.pending) return Promise.resolve();   // our own write is still in flight
+      return Cloud.all().then(function (rows) {
+        var next = { config: {}, chores: {}, absences: {}, updates: {}, occurrences: {} };
+        rows.forEach(function (row) {
+          var cut = String(row.path).indexOf('/');
+          if (cut < 0) return;
+          var col = row.path.slice(0, cut), id = row.path.slice(cut + 1);
+          if (!next[col]) next[col] = {};
+          next[col][id] = row.data;
+        });
+        self.raw = next;
+        self.offline = false;
+        self.ready = true;
+        self.persistLocal();
+        self.onChange();
+      }).catch(function () {
+        self.offline = true;
+        self.ready = true;
+        self.onChange();
+      });
+    },
+
+    /* No shared board reachable. Use whatever this browser holds; failing that,
+       the snapshot shipped with the page, so it is never empty. */
     startLocal: function (force) {
       var self = this;
       this.shared = false;
@@ -106,93 +190,61 @@
         .catch(function () { self.ready = true; self.onChange(); });
     },
 
-    subscribe: function () {
-      var self = this;
-      var db = this.db;
-      var pending = ['config/house', 'config/reminders', 'chores', 'absences', 'updates', 'occurrences'];
-      var reported = {};
-
-      // Hold `ready` until every subscription has reported once, so the board
-      // never flashes a half-loaded week.
-      function settle(key) {
-        reported[key] = true;
-        if (!self.ready) {
-          self.ready = pending.every(function (k) { return reported[k]; });
-        }
-        self.flush();
-      }
-
-      ['house', 'reminders'].forEach(function (id) {
-        var key = 'config/' + id;
-        db.doc(key).onSnapshot(function (snap) {
-          self.raw.config[id] = snap.exists ? snap.data() : null;
-          settle(key);
-        }, function () { settle(key); });
-      });
-
-      ['chores', 'absences', 'updates', 'occurrences'].forEach(function (name) {
-        db.collection(name).onSnapshot(function (snap) {
-          var next = {};
-          snap.docs.forEach(function (d) { next[d.id] = d.data(); });
-          self.raw[name] = next;
-          settle(name);
-        }, function () { settle(name); });
-      });
-
-      // If the store never answers, fall back rather than spin on "Loading".
-      setTimeout(function () {
-        if (!self.ready) { self.ready = true; self.flush(); }
-      }, 12000);
-    },
-
-    flush: function () {
-      var raw = this.raw;
-      safeLocal(function () { localStorage.setItem(CACHE_KEY, JSON.stringify(raw)); });
-      this.onChange();
-    },
-
-    /* Writes. Optimistic locally either way so the tap feels instant. */
+    /* Writes land locally first so the tap feels instant, then go up. */
     set: function (path, data) {
-      var parts = path.split('/');
-      var col = parts[0], id = parts[1];
-      if (col === 'config') this.raw.config[id] = data;
-      else this.raw[col][id] = data;
+      var self = this;
+      var cut = path.indexOf('/');
+      var col = path.slice(0, cut), id = path.slice(cut + 1);
+      if (!this.raw[col]) this.raw[col] = {};
+      this.raw[col][id] = data;
       this.persistLocal();
       this.onChange();
-      if (this.db) return this.db.doc(path).set(data).catch(this.warn);
-      return Promise.resolve();
+
+      if (!Cloud.ok()) return Promise.resolve();
+      this.pending++;
+      return Cloud.put(path, data).then(function () {
+        self.pending--;
+        return self.pull();
+      }).catch(function (e) {
+        self.pending--;
+        self.offline = true;
+        self.onChange();
+        App.flash('That did not save to the shared board. Check your connection.');
+      });
     },
 
     merge: function (path, patch) {
-      var parts = path.split('/');
-      var col = parts[0], id = parts[1];
-      var bucket = col === 'config' ? this.raw.config : this.raw[col];
-      var next = Object.assign({}, bucket[id] || {}, patch);
-      return this.set(path, next);
+      var cut = path.indexOf('/');
+      var col = path.slice(0, cut), id = path.slice(cut + 1);
+      var bucket = this.raw[col] || {};
+      return this.set(path, Object.assign({}, bucket[id] || {}, patch));
     },
 
     remove: function (path) {
-      var parts = path.split('/');
-      var col = parts[0], id = parts[1];
-      if (col === 'config') delete this.raw.config[id];
-      else delete this.raw[col][id];
+      var self = this;
+      var cut = path.indexOf('/');
+      var col = path.slice(0, cut), id = path.slice(cut + 1);
+      if (this.raw[col]) delete this.raw[col][id];
       this.persistLocal();
       this.onChange();
-      if (this.db) return this.db.doc(path).delete().catch(this.warn);
-      return Promise.resolve();
+
+      if (!Cloud.ok()) return Promise.resolve();
+      this.pending++;
+      return Cloud.del(path).then(function () {
+        self.pending--;
+        return self.pull();
+      }).catch(function () {
+        self.pending--;
+        self.offline = true;
+        self.onChange();
+        App.flash('That did not save to the shared board. Check your connection.');
+      });
     },
 
     persistLocal: function () {
       var raw = this.raw;
       safeLocal(function () { localStorage.setItem(CACHE_KEY, JSON.stringify(raw)); });
-      if (!this.db) safeLocal(function () { localStorage.setItem(LOCAL_KEY, JSON.stringify(raw)); });
-    },
-
-    warn: function (e) {
-      var msg = e && e.code === 'quota_exceeded'
-        ? 'The board is full. Delete some finished tasks in Settings.'
-        : 'That change did not save. Check your connection and try again.';
-      App.flash(msg);
+      if (!Cloud.ok()) safeLocal(function () { localStorage.setItem(LOCAL_KEY, JSON.stringify(raw)); });
     }
   };
 
@@ -343,7 +395,20 @@
       }
       var flash = this.flashMsg
         ? '<div class="banner"><b>Heads up</b> ' + h(this.flashMsg) + '</div>' : '';
-      return '<div class="wrap">' + flash + body + '</div>';
+
+      var notice = '';
+      if (Store.offline) {
+        notice = '<div class="banner"><b>Cannot reach the board.</b> ' +
+          'Showing the last copy this phone saw. Anything you change now will not ' +
+          'save until the connection is back.</div>';
+      } else if (Store.ready && !Store.shared) {
+        notice = '<div class="banner"><b>This device only.</b> ' +
+          (Store.snapshotOf ? 'Copy of the house board as it stood on ' +
+            pretty(Store.snapshotOf) + '. ' : '') +
+          'Nothing you tick here reaches the other phones.</div>';
+      }
+
+      return '<div class="wrap">' + flash + notice + body + '</div>';
     },
 
     renderFirstRun: function () {
@@ -483,15 +548,6 @@
               (g.items || []).map(function (t) { return '<li>' + h(t) + '</li>'; }).join('') +
               '</ul></section>';
           }).join('') + '</div></div>';
-      }
-
-      if (!Store.shared) {
-        out += '<div class="banner"><b>This device only.</b> ' +
-          (Store.snapshotOf ? 'Copy of the house board as it stood on ' +
-            pretty(Store.snapshotOf) + '. ' : '') +
-          'Nothing you tick here reaches the other phones. The board the house ' +
-          'shares is at <a href="https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN">claude.ai</a>.' +
-          '</div>';
       }
 
       return out;
@@ -853,7 +909,8 @@
 
       if (Store.shared) {
         out += '<div class="sec"><p class="hint">' +
-          'Changes are shared with everyone who opens this page.</p></div>';
+          'Everything on this board is shared. Ivan, Jett and Demitrius all see the ' +
+          'same thing within a few seconds of any change.</p></div>';
       } else {
         out += '<div class="sec"><div class="sec-head"><h2>This copy</h2></div>' +
           '<div class="panel"><div class="form">' +

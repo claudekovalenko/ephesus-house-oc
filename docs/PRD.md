@@ -380,13 +380,19 @@ These do not block M0–M2. Defaults are stated so work can proceed.
 
 ## 14. What shipped
 
-Built and published at https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN.
+Built and published at https://claudekovalenko.github.io/ephesus-house-oc/.
 
-Stack differs from §11 in one way: rather than Vite, React and Supabase, the app
-is plain HTML, CSS and JavaScript against the artifact document store. Same data
-model, same pure rotation module, no build step beyond stripping the document
-wrapper, and any housemate can read the whole thing. React would have bought
-nothing at this size.
+Stack differs from §11 in one way: plain HTML, CSS and JavaScript rather than
+Vite and React, which would have bought nothing at this size. Supabase is as
+§11 proposed, reached over PostgREST directly rather than through the client
+library — three fetches and a five-second poll beat a CDN dependency here, and
+a chore board does not need sub-second sync.
+
+It first shipped against the Claude artifact document store. That store is only
+reachable from inside the Claude viewer and only by members of the owner's
+organisation, so housemates without an account silently fell back to a private
+per-device board — the ticks they made reached nobody. Moving to Postgres fixed
+the actual requirement: one board, every phone, no account.
 
 Still open from §13: the zone cadence, the half-week threshold in §7.6, and
 whether updates should ever auto-rotate. All three are single settings to change

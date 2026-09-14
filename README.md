@@ -6,13 +6,10 @@ It answers one question the whiteboard could not: **who is on what this week,
 given who is actually home.** Mark someone away and the board reassigns their
 turns and keeps the rotation fair, with no erasing and rewriting.
 
-- **Live app (shared):** https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN
-  — this is the one to use. All three housemates see the same board.
-- **GitHub Pages copy:** https://claudekovalenko.github.io/ephesus-house-oc/
-  — the whole board, boots from `app/seed.json`, but **each device gets its own
-  private copy.** Shared storage only exists inside the Claude viewer. Tick
-  something here and nobody else sees it. The page says so at the bottom of the
-  board and offers a button to reload the house board.
+- **The board:** https://claudekovalenko.github.io/ephesus-house-oc/
+  — shared across every phone, no account needed. This is the link to hand out.
+- The old https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN link is now just a
+  signpost pointing at the board, so anyone who still has it gets through.
 - **Product requirements:** [`docs/PRD.md`](docs/PRD.md)
 - **The original board:** [`docs/assets/whiteboard-2026-09.jpg`](docs/assets/whiteboard-2026-09.jpg)
   and [the reminders corner](docs/assets/whiteboard-2026-09-reminders.jpg)
@@ -79,7 +76,8 @@ says so on the board, so the page always works.
 
 ## Data
 
-Shared state lives in the artifact's document store:
+Shared state lives in Postgres (Supabase), one row per document in
+`public.chores_docs`, keyed by `collection/id`:
 
 | Path | Holds |
 |---|---|
@@ -88,13 +86,28 @@ Shared state lives in the artifact's document store:
 | `chores/<id>` | One recurring chore or zone |
 | `absences/<id>` | One away range |
 | `updates/<id>` | One special task. The collection keeps its original name; the screen is called Special tasks |
-| `occurrences/<choreId>__<date>` | Done state and one-off swaps |
+| `occurrences/<choreId>__<date>` | Done state, checklist ticks, one-off swaps |
+
+Every phone reads the whole board and re-reads it every five seconds while the
+tab is open, plus immediately on focus and after its own writes. Writes are
+last-one-wins, which is the right trade for three people ticking chores.
+
+`app/config.js` holds the project URL and Supabase's publishable key. Both are
+public by design; row-level security on the server is what decides access, not
+the key.
+
+**The board is open to anyone who has the URL.** The policies let any visitor
+read and write, because there is no login. It holds first names and household
+chores, nothing else, and the page is unlisted rather than secret. If that ever
+stops being acceptable, the fix is a shared passphrase or real auth, not hiding
+the key.
 
 Only `occurrences` grows over time, at roughly 300 documents a year for six
 chores against a 5,000 document cap. Prune finished years if it ever gets close.
 
-`app/seed.json` is a snapshot of the live board, and the standalone copy boots
-from it when there is no shared store. Refresh it after changing the house setup:
+`app/seed.json` is a snapshot of the board. It is what the page falls back to if
+the database is unreachable on a first visit, so a cold open is never blank.
+Refresh it after changing the house setup:
 
 ```bash
 # export the live collections to a directory, one JSON file per document,
