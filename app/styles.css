@@ -299,19 +299,30 @@ select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
 
 /* ---------- reminders ---------- */
 
-.rem-group { border-top: 1px solid var(--line-soft); }
-.rem-group:first-child { border-top: 0; }
-.rem-group summary {
-  list-style: none; cursor: pointer; padding: 12px 14px;
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  font-family: var(--display); font-weight: 700; font-size: .75rem;
-  letter-spacing: .1em; text-transform: uppercase;
+.rem-block { border-top: 1px solid var(--line-soft); padding: 14px; }
+.rem-block:first-child { border-top: 0; }
+.rem-block h3 {
+  font-size: .6875rem; text-transform: uppercase; letter-spacing: .12em;
+  color: var(--marker); margin-bottom: 10px;
 }
-.rem-group summary::-webkit-details-marker { display: none; }
-.rem-group summary::after { content: "+"; color: var(--muted); font-size: 1rem; font-family: var(--body); }
-.rem-group[open] summary::after { content: "–"; }
-.rem-group ul { margin: 0; padding: 0 14px 14px 30px; display: flex; flex-direction: column; gap: 6px; }
-.rem-group li { font-size: .8125rem; color: var(--ink-soft); }
+.rem-block ul {
+  margin: 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.rem-block li {
+  position: relative; padding-left: 18px; line-height: 1.45;
+  font-size: .875rem; color: var(--ink-soft);
+}
+.rem-block li::before {
+  content: ""; position: absolute; left: 3px; top: .58em;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--marker); opacity: .55;
+}
+.rem-edit li { padding-left: 0; display: flex; gap: 8px; align-items: flex-start; }
+.rem-edit li::before { display: none; }
+.rem-add { display: flex; gap: 8px; margin-top: 11px; }
+.rem-add input { flex: 1; }
+.rem-add .btn { flex: none; }
 .panel {
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
@@ -458,9 +469,10 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: .7; }
 .tab {
   border: 0; background: none; padding: 9px 4px 11px;
   display: flex; flex-direction: column; align-items: center; gap: 3px;
-  font-size: .625rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+  font-size: .625rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
   color: var(--muted); position: relative;
 }
+.tab > span:not(.badge) { line-height: 1.2; text-align: center; text-wrap: balance; }
 .tab svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.6;
   stroke-linecap: round; stroke-linejoin: round; }
 .tab[aria-current="page"] { color: var(--marker); }

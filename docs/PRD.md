@@ -2,7 +2,9 @@
 
 **Status:** Built — M0 through M4 shipped, see §12
 **Date:** 2026-09-14
-**Source of truth today:** the whiteboard on the fridge (photo in `docs/assets/whiteboard-2026-09.jpg`)
+**Source of truth today:** the whiteboard on the fridge
+(`docs/assets/whiteboard-2026-09.jpg`, with the reminders corner in
+`docs/assets/whiteboard-2026-09-reminders.jpg`)
 
 ---
 
@@ -64,7 +66,7 @@ This is the initial data the app ships with. Everything here must be editable in
 
 Zones rotate on a fixed cadence (default: weekly, Monday). Each week a zone advances to the next person in the rotation order.
 
-### 4.4 Updates (one-off tasks)
+### 4.4 Special tasks (one-off)
 
 | Task | Due | Notes |
 |---|---|---|
@@ -73,6 +75,8 @@ Zones rotate on a fixed cadence (default: weekly, Monday). Each week a zone adva
 | Cardboard break down | — | All foam in one box |
 
 ### 4.5 Reminders (standing house rules, not assignable)
+
+Transcribed from the second photo of the board, which shows more than the first.
 
 **Bathroom**
 - Close window (AC)
@@ -83,14 +87,17 @@ Zones rotate on a fixed cadence (default: weekly, Monday). Each week a zone adva
 - Squeegee shower glass
 
 **Kitchen**
+- Take the trash out if it is on the floor
 - If it can't go in the dishwasher, do it by hand
 - Empty the dishwasher if possible
-- Take trash out when full
+- Take trash out when it is three quarters full
+- Fan on in the kitchen when cooking
 
 **Garage / House**
 - Close fridge fully
 - Close garage door
 - Deadbolt locked on house
+- Bags in the bin straight up
 - Street sweeping is Friday, move the cars off the curb
 
 > Correction, 2026-09-14: street sweeping was first transcribed from the board as
@@ -105,7 +112,7 @@ Zones rotate on a fixed cadence (default: weekly, Monday). Each week a zone adva
 | **Rotation** | The ordered list of housemates. Order is editable. |
 | **Chore** | A recurring, assignable job. Has a schedule (day of week + optional time window), a description, and an assignment mode. |
 | **Zone** | A chore whose assignment lasts a whole period (e.g., "Bathroom for the week") rather than a single day. Modeled as a chore with `cadence = weekly` and `assignment_mode = rotate`. |
-| **Update** | A one-off task with an optional due date and an optional assignee. Not part of the rotation unless the creator asks the app to "assign to whoever is next." |
+| **Special task** | A one-off task with an optional due date and an optional assignee. Not part of the rotation unless the creator asks the app to "assign to whoever is next." Called "Updates" on the whiteboard and in the first draft of this document; the house renamed it. The database collection is still `updates`. |
 | **Reminder** | Static text grouped by area. Never assigned, never completed. Just rules. |
 | **Absence** | A date range during which a housemate is not home. The core "exception" mechanism. |
 | **Occurrence** | A concrete instance of a chore on a concrete date, with a computed assignee and a done/not-done state. |
@@ -120,8 +127,8 @@ Priority: **P0** = must ship in v1. **P1** = should ship in v1 if cheap. **P2** 
 - Section "**Today**" pinned at top: every occurrence due today with its assignee and a done checkbox.
 - Section "**This week**": Monday through Sunday, each day listing its chores and assignees.
 - Section "**Zones this week**": Kitchen → name, Bathroom → name.
-- Section "**Updates**": open one-off tasks, sorted by due date, overdue first.
-- Section "**Reminders**": collapsed by default.
+- Section "**Special tasks**": open one-off tasks, sorted by due date, overdue first.
+- Section "**Reminders**": every group open, every item visible.
 - A person filter ("just show me mine") that persists on the device.
 - Absent housemates are shown with an "away" badge on days they are absent.
 
@@ -149,16 +156,18 @@ Priority: **P0** = must ship in v1. **P1** = should ship in v1 if cheap. **P2** 
 - Editing or deleting an absence recomputes the affected weeks.
 - Absences in the past cannot be retroactively used to un-assign completed occurrences; completed history is immutable.
 
-### 6.5 Updates (one-off tasks) — P0
+### 6.5 Special tasks (one-off) — P0
 
 - Create with: title, optional description, optional due date, optional assignee.
 - "Assign to next in rotation" button: picks the person who would be up next across the general rotation and who is home on the due date. This consumes a turn so the general rotation stays fair.
 - Mark done → moves to a "Done" list with timestamp and who did it. Not deleted.
-- Overdue updates are highlighted.
+- Overdue tasks are highlighted.
 
 ### 6.6 Reminders — P0
 
 - Grouped text lists (Bathroom / Kitchen / Garage-House). Add, edit, reorder, delete.
+- Shown on the board in full, all groups open. They are the things that have to
+  be done every time, so hiding them behind a tap defeats the point.
 - Read-only on the board, editable from a settings page.
 
 ### 6.7 History and fairness — P1 (shipped)
@@ -255,8 +264,8 @@ Occurrences are computed on the fly for the visible range and only persisted whe
 
 ## 9. Screens
 
-1. **Board** (`/`) — home; sections per §6.1. Bottom tab bar: Board · Updates · Away · Settings.
-2. **Update detail / new update** — sheet from the Updates tab.
+1. **Board** (`/`) — home; sections per §6.1. Bottom tab bar: Board · Special tasks · Away · Settings.
+2. **Special task detail / new task** — sheet from the Special tasks tab.
 3. **Away** — list of absences, "I'm away" button → date range picker → note. Shows a preview: "This will move Trash (Sept 16) to Demitrius."
 4. **Chore editor** — from Settings.
 5. **Settings** — housemates, rotation order (drag), reminders editor, week start, balance covers toggle.
@@ -302,7 +311,7 @@ These do not block M0–M2. Defaults are stated so work can proceed.
 1. **Zone rotation cadence.** Weekly on Monday is assumed. If the house actually rotates zones every two weeks, it is a one-field change.
 2. **Do all rotating chores share one pointer, or one pointer each?** Assumed *one per chore* (§6.3) because the whiteboard has Kitchen and Bathroom on different people simultaneously.
 3. **Half-week rule for zones (§7.6).** The 4-of-7 threshold is a guess. Could instead be "reassign if away on the weekend."
-4. **Should "Updates" ever auto-rotate?** Assumed opt-in per update via the "assign to next" button, not automatic.
+4. **Should special tasks ever auto-rotate?** Assumed opt-in per task via the "assign to next" button, not automatic.
 5. **Monday.** Currently empty on the board. Left empty; nothing to invent.
 
 

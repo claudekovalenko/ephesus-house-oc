@@ -156,7 +156,7 @@
 
     warn: function (e) {
       var msg = e && e.code === 'quota_exceeded'
-        ? 'The board is full. Delete some finished updates in Settings.'
+        ? 'The board is full. Delete some finished tasks in Settings.'
         : 'That change did not save. Check your connection and try again.';
       App.flash(msg);
     }
@@ -283,7 +283,7 @@
         away: '<path d="M4 20h16"/><path d="M6.5 15.5 3 9l2.2-.6 2.6 2.4 4-1.1-4.2-5 2.6-.7 6 4.9 4-1.1a1.7 1.7 0 0 1 .9 3.3L6.5 15.5Z"/>',
         settings: '<path d="M5 8h14M5 16h14"/><circle cx="10" cy="8" r="2.3"/><circle cx="15" cy="16" r="2.3"/>'
       };
-      var labels = { board: 'Board', updates: 'Updates', away: 'Away', settings: 'Settings' };
+      var labels = { board: 'Board', updates: 'Special tasks', away: 'Away', settings: 'Settings' };
       var badges = { updates: openUpdates, away: awayNow };
       var self = this;
       return '<div class="tabbar-in">' + ['board', 'updates', 'away', 'settings'].map(function (k) {
@@ -349,7 +349,7 @@
           '<span class="date">' + pretty(today) + '</span></div>' +
           (items.length
             ? '<div class="items">' + items.map(this.itemHTML, this).join('') + '</div>'
-            : '<div class="today-empty">Nothing scheduled today. Check the updates.</div>') +
+            : '<div class="today-empty">Nothing scheduled today. Check the special tasks.</div>') +
           '</div></div>';
       }
 
@@ -412,7 +412,7 @@
       var open = s.updates.filter(function (u) { return !u.doneAt; })
         .sort(this.updateSort.bind(this));
       if (open.length) {
-        out += '<div class="sec"><div class="sec-head"><h2>Updates</h2>' +
+        out += '<div class="sec"><div class="sec-head"><h2>Special tasks</h2>' +
           '<span class="aside">' + open.length + ' open</span></div>' +
           '<div class="panel">' + open.slice(0, 3).map(this.updateHTML, this).join('') +
           (open.length > 3
@@ -426,11 +426,13 @@
 
       /* reminders */
       if (s.reminders.length) {
-        out += '<div class="sec"><div class="sec-head"><h2>Reminders</h2></div><div class="panel">' +
+        var remCount = s.reminders.reduce(function (n, g) { return n + (g.items || []).length; }, 0);
+        out += '<div class="sec"><div class="sec-head"><h2>Reminders</h2>' +
+          '<span class="aside">' + remCount + ' standing rules</span></div><div class="panel">' +
           s.reminders.map(function (g) {
-            return '<details class="rem-group"><summary>' + h(g.label) + '</summary><ul>' +
+            return '<section class="rem-block"><h3>' + h(g.label) + '</h3><ul>' +
               (g.items || []).map(function (t) { return '<li>' + h(t) + '</li>'; }).join('') +
-              '</ul></details>';
+              '</ul></section>';
           }).join('') + '</div></div>';
       }
 
@@ -540,11 +542,11 @@
         .sort(function (a, b) { return a.doneAt < b.doneAt ? 1 : -1; });
       var d = this.draft;
 
-      var out = '<div class="sec"><div class="sec-head"><h2>New update</h2></div>' +
+      var out = '<div class="sec"><div class="sec-head"><h2>New special task</h2></div>' +
         '<div class="panel"><div class="form">' +
         '<div class="field"><label for="u-title">What needs doing</label>' +
         '<input type="text" id="u-title" data-draft="uTitle" value="' + h(d.uTitle || '') +
-        '" placeholder="Wipe down lights"></div>' +
+        '" placeholder="Wipe down the lights"></div>' +
         '<div class="row2">' +
         '<div class="field"><label for="u-due">Due (optional)</label>' +
         '<input type="date" id="u-due" data-draft="uDue" value="' + h(d.uDue || '') + '"></div>' +
@@ -723,18 +725,16 @@
       out += '<div class="sec"><div class="sec-head"><h2>Reminders</h2>' +
         '<span class="aside">house rules, never assigned</span></div><div class="panel">' +
         s.reminders.map(function (g, gi) {
-          return '<details class="rem-group"><summary>' + h(g.label) + '</summary><ul>' +
+          return '<section class="rem-block rem-edit"><h3>' + h(g.label) + '</h3><ul>' +
             (g.items || []).map(function (t, ti) {
-              return '<li style="display:flex;gap:8px;align-items:flex-start">' +
-                '<span style="flex:1">' + h(t) + '</span>' +
+              return '<li><span style="flex:1">' + h(t) + '</span>' +
                 '<button class="u-del" data-act="remdel" data-g="' + gi + '" data-i="' + ti +
                 '" aria-label="Remove reminder">✕</button></li>';
             }).join('') +
-            '<li><input type="text" id="rem-add-' + gi + '" data-draft="rem' + gi +
+            '</ul><div class="rem-add"><input type="text" id="rem-add-' + gi + '" data-draft="rem' + gi +
             '" placeholder="Add a reminder" value="' + h(this.draft['rem' + gi] || '') + '">' +
-            '<button class="btn sm" data-act="remadd" data-g="' + gi +
-            '" style="margin-top:6px">Add</button></li>' +
-            '</ul></details>';
+            '<button class="btn sm" data-act="remadd" data-g="' + gi + '">Add</button></div>' +
+            '</section>';
         }, this).join('') + '</div></div>';
 
       /* house settings */

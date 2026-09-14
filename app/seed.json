@@ -46,9 +46,11 @@
           "id": "kitchen",
           "label": "Kitchen",
           "items": [
+            "Take the trash out if it is on the floor",
             "If it cannot go in the dishwasher, do it by hand",
             "Empty the dishwasher if you can",
-            "Take the trash out when it is full"
+            "Take the trash out when it is three quarters full",
+            "Fan on in the kitchen when cooking"
           ]
         },
         {
@@ -58,6 +60,7 @@
             "Close the fridge fully",
             "Close the garage door",
             "Deadbolt the house door",
+            "Bags in the bin straight up",
             "Street sweeping is Friday, move the cars off the curb"
           ]
         }

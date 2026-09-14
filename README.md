@@ -9,13 +9,14 @@ turns and keeps the rotation fair, with no erasing and rewriting.
 - **Live app:** https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN
 - **Product requirements:** [`docs/PRD.md`](docs/PRD.md)
 - **The original board:** [`docs/assets/whiteboard-2026-09.jpg`](docs/assets/whiteboard-2026-09.jpg)
+  and [the reminders corner](docs/assets/whiteboard-2026-09-reminders.jpg)
 
 ## What it does
 
 | Screen | What it is for |
 |---|---|
-| **Board** | Today, the zones, the week day by day, open updates, and a four-week fairness check |
-| **Updates** | One-off tasks with due dates. "Next in rotation" picks whoever is up and home |
+| **Board** | Today, the zones, the week day by day, open special tasks, every reminder, and a four-week fairness check |
+| **Special tasks** | One-off tasks with due dates. "Next in rotation" picks whoever is up and home |
 | **Away** | Date ranges per housemate, with a preview of exactly what moves before you save |
 | **Settings** | Housemates, rotation order, chores, reminders, week start, time zone |
 
@@ -71,7 +72,7 @@ Shared state lives in the artifact's document store:
 | `config/reminders` | The standing house rules, grouped by area |
 | `chores/<id>` | One recurring chore or zone |
 | `absences/<id>` | One away range |
-| `updates/<id>` | One one-off task |
+| `updates/<id>` | One special task. The collection keeps its original name; the screen is called Special tasks |
 | `occurrences/<choreId>__<date>` | Done state and one-off swaps |
 
 Only `occurrences` grows over time, at roughly 300 documents a year for six
