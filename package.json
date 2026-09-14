@@ -1,0 +1,12 @@
+{
+  "name": "ephesus-house-oc",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chores rotation board for Ephesus House",
+  "scripts": {
+    "test": "node --test test/rotation.test.js",
+    "build": "node app/build-artifact.js",
+    "serve": "python3 -m http.server 8080 --directory app"
+  },
+  "license": "UNLICENSED"
+}

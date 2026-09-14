@@ -1,6 +1,6 @@
 # Ephesus House Chores — Product Requirements Document
 
-**Status:** Draft v1
+**Status:** Built — M0 through M4 shipped, see §12
 **Date:** 2026-09-14
 **Source of truth today:** the whiteboard on the fridge (photo in `docs/assets/whiteboard-2026-09.jpg`)
 
@@ -156,12 +156,12 @@ Priority: **P0** = must ship in v1. **P1** = should ship in v1 if cheap. **P2** 
 - Grouped text lists (Bathroom / Kitchen / Garage-House). Add, edit, reorder, delete.
 - Read-only on the board, editable from a settings page.
 
-### 6.7 History and fairness — P1
+### 6.7 History and fairness — P1 (shipped)
 
 - Per-person tally: chores completed in the last 4 / 12 weeks, chores covered for others, chores others covered for them.
 - A "fairness" indicator on the board: green if everyone is within ±1 of each other over the trailing 4 weeks.
 
-### 6.8 Swaps — P1
+### 6.8 Swaps — P1 (engine only, no UI yet)
 
 - Two housemates can swap an occurrence. Both must tap "agree" (or, given the trust model, one tap with an undo window). Swaps do not change the rotation pointer; they are one-off.
 
@@ -283,12 +283,12 @@ Alternative if Supabase feels heavy: a single Node/Hono server with SQLite on Fl
 
 | Milestone | Scope | Definition of done |
 |---|---|---|
-| **M0 — Engine** | `packages/rotation` with tests | All §7 examples and edge cases pass as unit tests |
-| **M1 — Board** | Read-only board fed by seed data from §4 | Opening the app shows this week exactly as the whiteboard would |
-| **M2 — Done + Updates** | Mark done, create/complete updates | House can stop using the whiteboard for updates |
-| **M3 — Absences** | Away flow with preview and reassignment | Someone can leave town and the board is correct without anyone touching it |
-| **M4 — Settings** | Chore editor, rotation order, reminders editor | Whiteboard erased |
-| **M5 (P1)** | History, fairness indicator, swaps, cover balancing | |
+| **M0 — Engine** | `app/rotation.js` with tests | **Done.** 29 tests over the §7 examples and edge cases |
+| **M1 — Board** | Board fed by the seed data in §4 | **Done.** This week renders exactly as the whiteboard reads |
+| **M2 — Done + Updates** | Mark done, create and complete updates | **Done.** |
+| **M3 — Absences** | Away flow with preview and reassignment | **Done.** The preview names each turn that moves before you save |
+| **M4 — Settings** | Chore editor, rotation order, reminders editor, housemates | **Done.** |
+| **M5 (P1)** | History, fairness, swaps, cover balancing | **Partly done.** Four-week fairness and cover balancing ship; swaps are supported by the engine and the data model but have no UI yet |
 
 ## 13. Open questions
 
@@ -299,3 +299,22 @@ These do not block M0–M2. Defaults are stated so work can proceed.
 3. **Half-week rule for zones (§7.6).** The 4-of-7 threshold is a guess. Could instead be "reassign if away on the weekend."
 4. **Should "Updates" ever auto-rotate?** Assumed opt-in per update via the "assign to next" button, not automatic.
 5. **Monday.** Currently empty on the board. Left empty; nothing to invent.
+
+
+---
+
+## 14. What shipped
+
+Built and published at https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN.
+
+Stack differs from §11 in one way: rather than Vite, React and Supabase, the app
+is plain HTML, CSS and JavaScript against the artifact document store. Same data
+model, same pure rotation module, no build step beyond stripping the document
+wrapper, and any housemate can read the whole thing. React would have bought
+nothing at this size.
+
+Still open from §13: the zone cadence, the half-week threshold in §7.6, and
+whether updates should ever auto-rotate. All three are single settings to change
+once the house has lived with the defaults for a few weeks.
+
+Not built: swap UI (§6.8), notifications (§10, P2).

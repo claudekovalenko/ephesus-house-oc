@@ -1,0 +1,110 @@
+{
+  "config": {
+    "house": {
+      "rotation": ["ivan", "jett", "demitrius"],
+      "housemates": {
+        "ivan":      { "name": "Ivan",      "color": "#dd6b36", "active": true },
+        "jett":      { "name": "Jett",      "color": "#14907e", "active": true },
+        "demitrius": { "name": "Demitrius", "color": "#a8478b", "active": true }
+      },
+      "weekStart": 1,
+      "timezone": "America/Los_Angeles",
+      "balanceCovers": false,
+      "updatePointer": "ivan"
+    },
+    "reminders": {
+      "groups": [
+        {
+          "id": "bathroom",
+          "label": "Bathroom",
+          "items": [
+            "Close the window when the AC is on",
+            "Nothing wet on the cabinet, it is wood",
+            "Open both the shower and the bathroom door after use",
+            "Leave the toilet lid on",
+            "Shave onto a paper towel",
+            "Squeegee the shower glass"
+          ]
+        },
+        {
+          "id": "kitchen",
+          "label": "Kitchen",
+          "items": [
+            "If it cannot go in the dishwasher, do it by hand",
+            "Empty the dishwasher if you can",
+            "Take the trash out when it is full"
+          ]
+        },
+        {
+          "id": "garage_house",
+          "label": "Garage and house",
+          "items": [
+            "Close the fridge fully",
+            "Close the garage door",
+            "Deadbolt the house door"
+          ]
+        }
+      ]
+    }
+  },
+  "chores": {
+    "pool": {
+      "name": "Clean the pool",
+      "day": 2, "cadence": "weekly", "mode": "rotate",
+      "anchorPerson": "ivan", "anchorDate": "2026-09-14",
+      "isZone": false, "window": "", "note": "", "order": 1
+    },
+    "trash": {
+      "name": "Take out the trash",
+      "day": 3, "cadence": "weekly", "mode": "rotate",
+      "anchorPerson": "jett", "anchorDate": "2026-09-14",
+      "isZone": false, "window": "4–8 PM", "note": "Both bins to the curb", "order": 2
+    },
+    "cans": {
+      "name": "Bring in the cans",
+      "day": 4, "cadence": "weekly", "mode": "rotate",
+      "anchorPerson": "demitrius", "anchorDate": "2026-09-14",
+      "isZone": false, "window": "Morning", "note": "Handles toward the street", "order": 3
+    },
+    "sweeping": {
+      "name": "Street sweeping",
+      "day": 5, "cadence": "weekly", "mode": "rotate",
+      "anchorPerson": "ivan", "anchorDate": "2026-09-14",
+      "isZone": false, "window": "", "note": "Move the cars off the curb", "order": 4
+    },
+    "kitchen": {
+      "name": "Kitchen sink and dishes",
+      "cadence": "weekly", "mode": "rotate",
+      "anchorPerson": "jett", "anchorDate": "2026-09-14",
+      "isZone": true, "window": "", "note": "", "order": 1
+    },
+    "bathroom": {
+      "name": "Bathroom",
+      "cadence": "weekly", "mode": "rotate",
+      "anchorPerson": "ivan", "anchorDate": "2026-09-14",
+      "isZone": true, "window": "", "note": "", "order": 2
+    }
+  },
+  "updates": {
+    "u-lights": {
+      "title": "Wipe down the lights",
+      "note": "", "due": null, "assignee": null,
+      "createdAt": "2026-09-14T00:00:00.000Z", "createdBy": null,
+      "doneAt": null, "doneBy": null
+    },
+    "u-planters": {
+      "title": "Build the planters",
+      "note": "", "due": "2026-09-25", "assignee": null,
+      "createdAt": "2026-09-14T00:00:00.000Z", "createdBy": null,
+      "doneAt": null, "doneBy": null
+    },
+    "u-cardboard": {
+      "title": "Break down the cardboard",
+      "note": "All the foam in one box", "due": null, "assignee": null,
+      "createdAt": "2026-09-14T00:00:00.000Z", "createdBy": null,
+      "doneAt": null, "doneBy": null
+    }
+  },
+  "absences": {},
+  "occurrences": {}
+}
