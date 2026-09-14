@@ -30,8 +30,10 @@ covered does not silently end up doing more forever.
 Worked through in [`docs/PRD.md`](docs/PRD.md) §7, and locked down by the tests.
 
 A chore can also be **held** for a week or a month rather than reassigned every
-time. The deep clean happens every two weeks but holds for a month, so the same
-person does both of that month's before it moves on. Availability over a held
+time, and it can have **no set day** at all. The deep clean is both: it comes round
+every two weeks and is held for a month, so the same person does both of that
+month's before it moves on, and each one is a window to finish rather than a dated
+job. The board shows it as days remaining, not a date. Availability over a held
 period is one rule: you keep it if you are home for at least half of it. A
 week-long hold is a zone; none are defined at the moment, but the board still
 shows them if you add one.
@@ -48,7 +50,7 @@ app/
   build-artifact.js  strips the document wrapper for publishing
   whiteboard.jpg     the original board
 test/
-  rotation.test.js   37 tests over the PRD's worked examples and edge cases
+  rotation.test.js   43 tests over the PRD's worked examples and edge cases
 docs/
   PRD.md             requirements, algorithm, data model, milestones
 ```

@@ -119,6 +119,25 @@
     var out = [];
     var cur;
 
+    if (chore.undated) {
+      // No set day: the occurrence is the stretch it belongs to, keyed by the
+      // day that stretch opens. Do it whenever suits inside that window.
+      if (chore.cadence === 'monthly') {
+        cur = chore.anchorDate.slice(0, 7) + '-01';
+        while (cur <= through) {
+          out.push(cur);
+          var ny = +cur.slice(0, 4), nm = +cur.slice(5, 7) + 1;
+          if (nm > 12) { nm = 1; ny++; }
+          cur = ny + '-' + pad(nm) + '-01';
+        }
+        return out;
+      }
+      var stride = chore.cadence === 'biweekly' ? 14 : 7;
+      cur = startOfWeek(chore.anchorDate, ctx.weekStart);
+      while (cur <= through) { out.push(cur); cur = addDays(cur, stride); }
+      return out;
+    }
+
     if (chore.isZone) {
       // A zone is held for a whole week; its occurrence is the week start.
       cur = startOfWeek(chore.anchorDate, ctx.weekStart);
@@ -310,7 +329,7 @@
 
     for (var c = 0; c < state.chores.length; c++) {
       var chore = state.chores[c];
-      if (chore.archived) continue;
+      if (chore.archived || chore.undated) continue;
       var byDate = all[chore.id] || {};
 
       if (chore.isZone) {
@@ -354,6 +373,48 @@
       doneBy: rec ? rec.doneBy : null,
       checked: (rec && rec.checked) || {}
     };
+  }
+
+  /** The stretch of days one undated occurrence covers. */
+  function spanOf(chore, iso, ctx) {
+    if (chore.cadence === 'monthly') {
+      var range = periodRange(iso, 'month', ctx.weekStart);
+      return { start: range.start, end: addDays(range.start, range.days - 1) };
+    }
+    return { start: iso, end: addDays(iso, (chore.cadence === 'biweekly' ? 14 : 7) - 1) };
+  }
+
+  /**
+   * Standing work: every undated chore, the window it is currently in, who has
+   * it, and how far through its checklist they are. This is what the deep clean
+   * panel renders — there is no date to show, only "before this runs out".
+   */
+  function standing(state, onDate) {
+    var ctx = contextOf(state);
+    var all = assignAll(state, addDays(onDate, 120));
+    var done = state.occurrences || {};
+    var out = [];
+
+    state.chores.forEach(function (ch) {
+      if (ch.archived || !ch.undated) return;
+      var byDate = all[ch.id] || {};
+      var dates = Object.keys(byDate).sort();
+      if (!dates.length) return;
+
+      var cur = dates[0];
+      for (var i = 0; i < dates.length; i++) if (dates[i] <= onDate) cur = dates[i];
+
+      var item = decorate(ch, cur, byDate[cur], done, state);
+      item.span = spanOf(ch, cur, ctx);
+      item.daysLeft = diffDays(onDate, item.span.end);
+      var later = dates.filter(function (d) { return d > cur; });
+      item.nextStart = later.length ? later[0] : null;
+      item.nextAssignee = later.length ? byDate[later[0]].assignee : null;
+      out.push(item);
+    });
+
+    out.sort(function (a, b) { return (a.chore.order || 0) - (b.chore.order || 0); });
+    return out;
   }
 
   /**
@@ -485,7 +546,7 @@
     nthWeekdayOfMonth: nthWeekdayOfMonth, today: today,
     isAway: isAway, awayDaysInWeek: awayDaysInWeek,
     periodRange: periodRange, availableForPeriod: availableForPeriod, holdOf: holdOf,
-    heldThisMonth: heldThisMonth,
+    heldThisMonth: heldThisMonth, standing: standing, spanOf: spanOf,
     occurrenceDates: occurrenceDates, assignChore: assignChore, assignAll: assignAll,
     buildWeek: buildWeek, occurrenceKey: occurrenceKey,
     tally: tally, isBalanced: isBalanced,

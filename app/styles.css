@@ -220,7 +220,7 @@ select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
 .tag.cover  { color: var(--marker); background: var(--marker-soft); }
 .tag.away   { color: var(--danger); background: color-mix(in oklab, var(--danger) 13%, transparent); }
 .tag.swap   { color: var(--ink-soft); background: var(--surface-2); }
-.tag.zone   { color: var(--muted); background: var(--surface-2); }
+.tag.quiet  { color: var(--muted); background: var(--surface-2); }
 .tag.late   { color: var(--danger); background: color-mix(in oklab, var(--danger) 13%, transparent); }
 
 /* ---------- week list ---------- */

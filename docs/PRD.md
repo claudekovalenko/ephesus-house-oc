@@ -59,8 +59,10 @@ This is the initial data the app ships with. Everything here must be editable in
 
 ### 4.3 Deep clean (added 2026-09-14, not from the board)
 
-Every two weeks, on Saturday. Each area is held by one person for a whole month.
-Starting holders: kitchen Ivan, bathroom Jett, living and dining Demitrius.
+Every two weeks, with **no set day**: the fortnight is the unit, and it gets done
+whenever suits inside it. Each area is held by one person for a whole month, which
+is two fortnights, so the holder does both before it moves on. Starting holders:
+kitchen Ivan, bathroom Jett, living and dining Demitrius.
 
 | Area | Jobs |
 |---|---|
@@ -68,7 +70,9 @@ Starting holders: kitchen Ivan, bathroom Jett, living and dining Demitrius.
 | Bathroom | Clean the shower · clean the shower door · clean the toilet, and get behind it · clean the sink and counter · sweep and mop the floor |
 | Living and dining room | Dust · dust the fans · vacuum · wipe down the tables |
 
-> Saturday was chosen, not specified. It is one field in Settings to change.
+> First built as a dated Saturday job; the house corrected it. A deep clean is
+> kept, not scheduled, so it now shows as a window with days remaining rather than
+> sitting in a day row.
 
 ### 4.4 Rotating zones (removed)
 
@@ -132,6 +136,7 @@ Transcribed from the second photo of the board, which shows more than the first.
 | **Chore** | A recurring, assignable job. Has a schedule (day of week + optional time window), a description, and an assignment mode. |
 | **Zone** | A chore whose assignment lasts a whole period (e.g., "Bathroom for the week") rather than a single day. Modeled as a chore with `hold_period = week`. |
 | **Hold period** | How long one person owns a chore before it moves on: each occurrence (the default), a week, or a month. Independent of how often the chore comes round. A deep clean happens every two weeks but is held for a month, so the same person does both of that month's. |
+| **Undated chore** | A chore with no day of the week. Its occurrence is the stretch it belongs to, keyed by the day that stretch opens, and it appears as a window with days remaining rather than in a day row. |
 | **Special task** | A one-off task with an optional due date and an optional assignee. Not part of the rotation unless the creator asks the app to "assign to whoever is next." Called "Updates" on the whiteboard and in the first draft of this document; the house renamed it. The database collection is still `updates`. |
 | **Reminder** | Static text grouped by area. Never assigned, never completed. Just rules. |
 | **Absence** | A date range during which a housemate is not home. The core "exception" mechanism. |
@@ -148,7 +153,8 @@ Priority: **P0** = must ship in v1. **P1** = should ship in v1 if cheap. **P2** 
 - Section "**This week**": Monday through Sunday, each day listing its chores and assignees.
 - Section "**Zones this week**": any week-held chore and its holder. Hidden when
   there are none, which is the current state.
-- Section "**Deep clean**": each area, who holds it this month, and the next date.
+- Section "**Deep clean**": each area, who holds it this month, the current
+  window and days left, and its checklist.
 - Section "**Special tasks**": open one-off tasks, sorted by due date, overdue first.
 - Section "**Reminders**": every group open, every item visible.
 - A person filter ("just show me mine") that persists on the device.
@@ -269,7 +275,18 @@ they take the next period rather than losing the turn.
   area that month before it moves on. With three areas and three housemates,
   everyone holds exactly one area at a time.
 
-### 7.6b Checklists
+### 7.6b Undated chores
+
+A chore may have no day. Its occurrences are then the period starts themselves,
+aligned to the week start (every week, or every other week) or to the first of the
+month. Such a chore never appears in a day row; it is shown as the window it is
+currently in, with the days left before that window closes. The done state and
+checklist ticks belong to that window, so a new fortnight starts clean.
+
+This is the difference between work that has to happen *on Wednesday between four
+and eight* and work that simply has to happen *before the fortnight is out*.
+
+### 7.6c Checklists
 
 A chore may carry a checklist of the jobs it involves. Ticks are stored per
 occurrence, not per chore, so last fortnight's ticks do not carry over. An
@@ -291,7 +308,7 @@ Housemate   { id, name, color, active, sort_order }
 Chore       { id, name, description, cadence, day_of_week[], time_start?, time_end?,
               assignment_mode (rotate|fixed|everyone), fixed_assignee_id?,
               rotation_pointer_person_id, pointer_anchor_date,
-              hold_period (null|week|month), checklist[], is_zone, archived }
+              hold_period (null|week|month), undated, checklist[], is_zone, archived }
 Occurrence  { id, chore_id, date, assigned_to_id?, covering_for_id?,
               done_at?, done_by_id?, checked{index: true}, note? }
               -- materialized only when marked done or manually overridden;
@@ -379,5 +396,5 @@ Not built: swap UI (§6.8), notifications (§10, P2).
 
 Added after the first build, at the house's request: special tasks (renamed from
 updates), reminders shown open rather than collapsed, and the deep clean with
-month-long holds and per-occurrence checklists (§4.3, §7.6). Street sweeping and
-the two named zones were removed (§4.2, §4.4).
+month-long holds, undated windows and per-occurrence checklists (§4.3, §7.6).
+Street sweeping and the two named zones were removed (§4.2, §4.4).

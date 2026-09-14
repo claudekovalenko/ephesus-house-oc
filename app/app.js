@@ -366,7 +366,7 @@
             var tags = '';
             if (z.coveringFor) tags += '<span class="tag cover">covering ' + h(nameOf(s, z.coveringFor)) + '</span>';
             if (z.unassigned) tags += '<span class="tag away">house away</span>';
-            if (z.doneAt) tags += '<span class="tag zone">done</span>';
+            if (z.doneAt) tags += '<span class="tag quiet">done</span>';
             return '<div class="zone" style="--c:' + h(c) + '">' +
               '<h3>' + h(z.chore.name) + '</h3>' +
               '<div class="holder"><span class="swatch"></span><span class="nm">' +
@@ -376,28 +376,18 @@
           }).join('') + '</div></div>';
       }
 
-      /* month-long responsibilities */
-      var held = R.heldThisMonth(s, today);
-      if (held.length) {
+      /* standing work with no set day */
+      var standing = R.standing(s, today);
+      if (standing.length) {
+        var holdNote = standing.some(function (x) { return R.holdOf(x.chore) === 'month'; })
+          ? 'Whoever holds an area keeps it for the whole month, then it moves on. ' +
+            'Do it any time before the window runs out.'
+          : 'Do it any time before the window runs out.';
         out += '<div class="sec"><div class="sec-head"><h2>Deep clean</h2>' +
-          '<span class="aside">' + monthName(today) + '</span></div><div class="panel">' +
-          held.map(function (x) {
-            var hc = x.assignee ? colorOf(s, x.assignee) : 'var(--muted)';
-            var bits = [];
-            if (x.next) bits.push('next ' + prettyFull(x.next));
-            else if (x.dates.length) bits.push('none left this month');
-            if ((x.chore.checklist || []).length) bits.push(x.chore.checklist.length + ' jobs');
-            if (x.coveringFor) bits.push('covering ' + nameOf(s, x.coveringFor));
-            return '<div class="deep-row" style="--c:' + h(hc) + '">' +
-              '<div class="deep-main"><div class="deep-name">' + h(x.chore.name) + '</div>' +
-              '<div class="deep-meta">' + h(bits.join(' \u00b7 ')) + '</div></div>' +
-              (x.assignee
-                ? '<span class="who"><span class="swatch"></span>' + h(nameOf(s, x.assignee)) + '</span>'
-                : '<span class="who nobody">unassigned</span>') +
-              '</div>';
-          }).join('') + '</div>' +
-          '<p class="hint" style="margin-top:8px">Whoever holds an area keeps it for the ' +
-          'whole month, then it moves on.</p></div>';
+          '<span class="aside">' + monthName(today) + '</span></div>' +
+          '<div class="panel"><div class="items">' +
+          standing.map(this.itemHTML, this).join('') + '</div></div>' +
+          '<p class="hint" style="margin-top:8px">' + holdNote + '</p></div>';
       }
 
       /* the week */
@@ -479,7 +469,18 @@
       var ch = item.chore;
 
       var meta = '';
-      if (ch.window) meta += '<span class="when">' + h(ch.window) + '</span>';
+      if (item.span) {
+        meta += '<span class="when">' + pretty(item.span.start) + ' \u2013 ' +
+          pretty(item.span.end) + '</span>';
+        if (item.daysLeft != null && !item.doneAt) {
+          meta += '<span class="tag ' + (item.daysLeft <= 3 ? 'late' : 'quiet') + '">' +
+            (item.daysLeft < 0 ? 'window closed'
+              : item.daysLeft === 0 ? 'last day'
+              : item.daysLeft + ' days left') + '</span>';
+        }
+      } else if (ch.window) {
+        meta += '<span class="when">' + h(ch.window) + '</span>';
+      }
       if (item.coveringFor) {
         meta += '<span class="tag cover">covering ' + h(nameOf(s, item.coveringFor)) + '</span>';
       }
@@ -489,7 +490,7 @@
       if (item.away) meta += '<span class="tag away">away</span>';
       if (item.unassigned) meta += '<span class="tag away">house away</span>';
       if (item.doneAt && item.doneBy) {
-        meta += '<span class="tag zone">done by ' + h(nameOf(s, item.doneBy)) + '</span>';
+        meta += '<span class="tag quiet">done by ' + h(nameOf(s, item.doneBy)) + '</span>';
       }
 
       var who = item.shared
@@ -574,7 +575,7 @@
         meta += '<span class="who" style="--c:' + h(colorOf(s, u.assignee)) + '">' +
           '<span class="swatch"></span>' + h(nameOf(s, u.assignee)) + '</span>';
       }
-      if (u.doneAt && u.doneBy) meta += '<span class="tag zone">done by ' + h(nameOf(s, u.doneBy)) + '</span>';
+      if (u.doneAt && u.doneBy) meta += '<span class="tag quiet">done by ' + h(nameOf(s, u.doneBy)) + '</span>';
 
       return '<div class="update' + (u.doneAt ? ' is-done' : '') + '">' +
         '<button class="tick' + (u.doneAt ? ' on' : '') + '" data-act="utick" data-id="' + h(u.id) +
@@ -829,11 +830,13 @@
       var s = this.state;
       var open = this.editingChore === c.id;
       var hold = R.holdOf(c);
+      var cadenceWord = c.cadence === 'biweekly' ? 'every other week'
+        : c.cadence === 'monthly' ? 'monthly' : 'weekly';
       var desc = c.isZone
         ? 'Zone · rotates weekly'
-        : DOW_LONG[c.day] + (c.cadence === 'biweekly' ? ' · every other week'
-            : c.cadence === 'monthly' ? ' · monthly' : ' · weekly') +
-          (c.window ? ' · ' + c.window : '');
+        : c.undated
+          ? 'No set day · ' + cadenceWord
+          : DOW_LONG[c.day] + ' · ' + cadenceWord + (c.window ? ' · ' + c.window : '');
       if (!c.isZone && hold === 'month') desc += ' · held for the month';
       if (!c.isZone && hold === 'week') desc += ' · held for the week';
       if (c.mode === 'fixed') desc += ' · always ' + nameOf(s, c.fixedAssignee);
@@ -851,9 +854,18 @@
           '<div class="field"><label for="ch-name">Name</label>' +
           '<input type="text" id="ch-name" data-chore="' + h(c.id) + '" data-f="name" value="' +
           h(c.name) + '"></div>' +
+          '<div class="field"><label for="ch-when">When it gets done</label>' +
+          '<select id="ch-when" data-chore="' + h(c.id) + '" data-f="undated"' +
+          (c.isZone ? ' disabled' : '') + '>' +
+          [['false', 'On a set day'], ['true', 'Any time before it comes round again']]
+            .map(function (o) {
+              return '<option value="' + o[0] + '"' + ((c.undated ? 'true' : 'false') === o[0] ? ' selected' : '') +
+                '>' + o[1] + '</option>';
+            }).join('') + '</select></div>' +
           '<div class="row2">' +
           '<div class="field"><label for="ch-day">Day</label>' +
-          '<select id="ch-day" data-chore="' + h(c.id) + '" data-f="day"' + (c.isZone ? ' disabled' : '') + '>' +
+          '<select id="ch-day" data-chore="' + h(c.id) + '" data-f="day"' +
+          (c.isZone || c.undated ? ' disabled' : '') + '>' +
           DOW_LONG.map(function (d, i) {
             return '<option value="' + i + '"' + (c.day === i ? ' selected' : '') + '>' + d + '</option>';
           }).join('') + '</select></div>' +
@@ -935,6 +947,7 @@
         var id = t.dataset.chore, f = t.dataset.f;
         var val = f === 'day' ? +t.value : t.value;
         if (f === 'holdPeriod' && val === '') val = null;
+        if (f === 'undated') val = (t.value === 'true');
         var patch = {};
         patch[f] = val;
         if (f === 'anchorPerson') {
@@ -1158,7 +1171,8 @@
             name: 'New chore', day: 1, cadence: 'weekly', mode: 'rotate',
             anchorPerson: s.rotation[0] || null,
             anchorDate: R.startOfWeek(today, s.weekStart),
-            isZone: false, note: '', window: '', holdPeriod: null, checklist: [],
+            isZone: false, undated: false, note: '', window: '',
+            holdPeriod: null, checklist: [],
             order: s.chores.length + 1
           });
           this.editingChore = id;

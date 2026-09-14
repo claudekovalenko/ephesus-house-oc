@@ -105,7 +105,6 @@
       "order": 3
     },
     "deep-kitchen": {
-      "day": 6,
       "cadence": "biweekly",
       "mode": "rotate",
       "holdPeriod": "month",
@@ -122,10 +121,10 @@
         "Clean the inside of the sink",
         "Wipe down the tables",
         "Clean the stove"
-      ]
+      ],
+      "undated": true
     },
     "deep-bathroom": {
-      "day": 6,
       "cadence": "biweekly",
       "mode": "rotate",
       "holdPeriod": "month",
@@ -142,10 +141,10 @@
         "Clean the toilet, and get behind it",
         "Clean the sink and counter",
         "Sweep and mop the floor"
-      ]
+      ],
+      "undated": true
     },
     "deep-living": {
-      "day": 6,
       "cadence": "biweekly",
       "mode": "rotate",
       "holdPeriod": "month",
@@ -161,7 +160,8 @@
         "Dust the fans",
         "Vacuum",
         "Wipe down the tables"
-      ]
+      ],
+      "undated": true
     }
   },
   "updates": {

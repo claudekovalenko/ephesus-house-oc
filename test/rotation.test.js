@@ -411,3 +411,67 @@ test('a month-held chore carries its checklist ticks onto the occurrence', () =>
   assert.strictEqual(item.chore.checklist.length, 2);
   assert.deepStrictEqual(item.checked, { 0: true });
 });
+
+/* ---------- standing work with no set day ---------- */
+
+const standingDeep = (over) => Object.assign(deep(), {
+  undated: true, day: undefined, checklist: ['Sweep and mop the floor', 'Clean the stove']
+}, over || {});
+
+test('an undated chore lands on its window start, not a weekday', () => {
+  const a = R.assignAll(baseState({ chores: [standingDeep()] }), '2026-11-30')['deep-kitchen'];
+  assert.deepStrictEqual(Object.keys(a).sort(),
+    ['2026-09-14', '2026-09-28', '2026-10-12', '2026-10-26', '2026-11-09', '2026-11-23']);
+  Object.keys(a).forEach((d) => assert.strictEqual(R.dayOfWeek(d), 1, `${d} should open a week`));
+});
+
+test('an undated chore never appears in a day row', () => {
+  const wk = R.buildWeek(baseState({ chores: [standingDeep(), trash()] }), '2026-09-16');
+  const names = wk.days.flatMap((d) => d.items.map((i) => i.chore.id));
+  assert.deepStrictEqual(names, ['trash']);
+  assert.strictEqual(wk.zones.length, 0);
+});
+
+test('two fortnights a month means the month holder does both', () => {
+  const a = R.assignAll(baseState({ chores: [standingDeep()] }), '2026-11-30')['deep-kitchen'];
+  assert.strictEqual(a['2026-09-14'].assignee, IVAN);
+  assert.strictEqual(a['2026-09-28'].assignee, IVAN);   // still September
+  assert.strictEqual(a['2026-10-12'].assignee, JETT);
+  assert.strictEqual(a['2026-10-26'].assignee, JETT);
+  assert.strictEqual(a['2026-11-09'].assignee, DEM);
+  assert.strictEqual(a['2026-11-23'].assignee, DEM);
+});
+
+test('standing reports the window you are in, not the next one', () => {
+  const st = baseState({ chores: [standingDeep()] });
+  const mid = R.standing(st, '2026-09-20')[0];
+  assert.strictEqual(mid.span.start, '2026-09-14');
+  assert.strictEqual(mid.span.end, '2026-09-27');
+  assert.strictEqual(mid.daysLeft, 7);
+  assert.strictEqual(mid.assignee, IVAN);
+  assert.strictEqual(mid.nextStart, '2026-09-28');
+
+  const rolled = R.standing(st, '2026-09-28')[0];
+  assert.strictEqual(rolled.span.start, '2026-09-28');
+  assert.strictEqual(rolled.daysLeft, 13);
+});
+
+test('standing carries the checklist state for the current window only', () => {
+  const st = baseState({
+    chores: [standingDeep()],
+    occurrences: { 'deep-kitchen__2026-09-14': { checked: { 0: true } } }
+  });
+  assert.deepStrictEqual(R.standing(st, '2026-09-20')[0].checked, { 0: true });
+  assert.deepStrictEqual(R.standing(st, '2026-09-28')[0].checked, {});  // fresh window
+});
+
+test('an undated chore still hands over at the month boundary when away', () => {
+  const st = baseState({
+    chores: [standingDeep()],
+    absences: [{ housemateId: IVAN, start: '2026-09-01', end: '2026-09-30' }]
+  });
+  const a = R.assignAll(st, '2026-10-31')['deep-kitchen'];
+  assert.strictEqual(a['2026-09-14'].assignee, JETT);
+  assert.strictEqual(a['2026-09-14'].coveringFor, IVAN);
+  assert.strictEqual(a['2026-10-12'].assignee, IVAN);  // back, still up next
+});
