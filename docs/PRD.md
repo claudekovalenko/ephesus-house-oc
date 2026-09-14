@@ -53,7 +53,7 @@ This is the initial data the app ships with. Everything here must be editable in
 | Tuesday | Clean pool | |
 | Wednesday | Take out trash (bins) | Between 4–8 PM |
 | Thursday | Bring in cans | In the morning. Handles toward the street. |
-| Friday | Street sweeping | Move cars / clear the curb |
+| Friday | *(see reminders)* | Street sweeping — see §4.5. It is a standing reminder, not an assigned turn. |
 
 ### 4.3 Rotating zones (current holders as of the photo)
 
@@ -91,6 +91,11 @@ Zones rotate on a fixed cadence (default: weekly, Monday). Each week a zone adva
 - Close fridge fully
 - Close garage door
 - Deadbolt locked on house
+- Street sweeping is Friday, move the cars off the curb
+
+> Correction, 2026-09-14: street sweeping was first transcribed from the board as
+> a Friday chore. The house corrected it — nobody is assigned to it, everyone just
+> has to move their own car — so it is a reminder, not a rotating turn.
 
 ## 5. Core concepts
 

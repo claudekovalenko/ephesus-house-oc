@@ -1,11 +1,27 @@
 {
   "config": {
     "house": {
-      "rotation": ["ivan", "jett", "demitrius"],
+      "rotation": [
+        "ivan",
+        "jett",
+        "demitrius"
+      ],
       "housemates": {
-        "ivan":      { "name": "Ivan",      "color": "#dd6b36", "active": true },
-        "jett":      { "name": "Jett",      "color": "#14907e", "active": true },
-        "demitrius": { "name": "Demitrius", "color": "#a8478b", "active": true }
+        "ivan": {
+          "name": "Ivan",
+          "color": "#dd6b36",
+          "active": true
+        },
+        "jett": {
+          "name": "Jett",
+          "color": "#14907e",
+          "active": true
+        },
+        "demitrius": {
+          "name": "Demitrius",
+          "color": "#a8478b",
+          "active": true
+        }
       },
       "weekStart": 1,
       "timezone": "America/Los_Angeles",
@@ -41,7 +57,8 @@
           "items": [
             "Close the fridge fully",
             "Close the garage door",
-            "Deadbolt the house door"
+            "Deadbolt the house door",
+            "Street sweeping is Friday, move the cars off the curb"
           ]
         }
       ]
@@ -50,59 +67,93 @@
   "chores": {
     "pool": {
       "name": "Clean the pool",
-      "day": 2, "cadence": "weekly", "mode": "rotate",
-      "anchorPerson": "ivan", "anchorDate": "2026-09-14",
-      "isZone": false, "window": "", "note": "", "order": 1
+      "day": 2,
+      "cadence": "weekly",
+      "mode": "rotate",
+      "anchorPerson": "ivan",
+      "anchorDate": "2026-09-14",
+      "isZone": false,
+      "window": "",
+      "note": "",
+      "order": 1
     },
     "trash": {
       "name": "Take out the trash",
-      "day": 3, "cadence": "weekly", "mode": "rotate",
-      "anchorPerson": "jett", "anchorDate": "2026-09-14",
-      "isZone": false, "window": "4–8 PM", "note": "Both bins to the curb", "order": 2
+      "day": 3,
+      "cadence": "weekly",
+      "mode": "rotate",
+      "anchorPerson": "jett",
+      "anchorDate": "2026-09-14",
+      "isZone": false,
+      "window": "4–8 PM",
+      "note": "Both bins to the curb",
+      "order": 2
     },
     "cans": {
       "name": "Bring in the cans",
-      "day": 4, "cadence": "weekly", "mode": "rotate",
-      "anchorPerson": "demitrius", "anchorDate": "2026-09-14",
-      "isZone": false, "window": "Morning", "note": "Handles toward the street", "order": 3
-    },
-    "sweeping": {
-      "name": "Street sweeping",
-      "day": 5, "cadence": "weekly", "mode": "rotate",
-      "anchorPerson": "ivan", "anchorDate": "2026-09-14",
-      "isZone": false, "window": "", "note": "Move the cars off the curb", "order": 4
+      "day": 4,
+      "cadence": "weekly",
+      "mode": "rotate",
+      "anchorPerson": "demitrius",
+      "anchorDate": "2026-09-14",
+      "isZone": false,
+      "window": "Morning",
+      "note": "Handles toward the street",
+      "order": 3
     },
     "kitchen": {
       "name": "Kitchen sink and dishes",
-      "cadence": "weekly", "mode": "rotate",
-      "anchorPerson": "jett", "anchorDate": "2026-09-14",
-      "isZone": true, "window": "", "note": "", "order": 1
+      "cadence": "weekly",
+      "mode": "rotate",
+      "anchorPerson": "jett",
+      "anchorDate": "2026-09-14",
+      "isZone": true,
+      "window": "",
+      "note": "",
+      "order": 1
     },
     "bathroom": {
       "name": "Bathroom",
-      "cadence": "weekly", "mode": "rotate",
-      "anchorPerson": "ivan", "anchorDate": "2026-09-14",
-      "isZone": true, "window": "", "note": "", "order": 2
+      "cadence": "weekly",
+      "mode": "rotate",
+      "anchorPerson": "ivan",
+      "anchorDate": "2026-09-14",
+      "isZone": true,
+      "window": "",
+      "note": "",
+      "order": 2
     }
   },
   "updates": {
     "u-lights": {
       "title": "Wipe down the lights",
-      "note": "", "due": null, "assignee": null,
-      "createdAt": "2026-09-14T00:00:00.000Z", "createdBy": null,
-      "doneAt": null, "doneBy": null
+      "note": "",
+      "due": null,
+      "assignee": null,
+      "createdAt": "2026-09-14T00:00:00.000Z",
+      "createdBy": null,
+      "doneAt": null,
+      "doneBy": null
     },
     "u-planters": {
       "title": "Build the planters",
-      "note": "", "due": "2026-09-25", "assignee": null,
-      "createdAt": "2026-09-14T00:00:00.000Z", "createdBy": null,
-      "doneAt": null, "doneBy": null
+      "note": "",
+      "due": "2026-09-25",
+      "assignee": null,
+      "createdAt": "2026-09-14T00:00:00.000Z",
+      "createdBy": null,
+      "doneAt": null,
+      "doneBy": null
     },
     "u-cardboard": {
       "title": "Break down the cardboard",
-      "note": "All the foam in one box", "due": null, "assignee": null,
-      "createdAt": "2026-09-14T00:00:00.000Z", "createdBy": null,
-      "doneAt": null, "doneBy": null
+      "note": "All the foam in one box",
+      "due": null,
+      "assignee": null,
+      "createdAt": "2026-09-14T00:00:00.000Z",
+      "createdBy": null,
+      "doneAt": null,
+      "doneBy": null
     }
   },
   "absences": {},
