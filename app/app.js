@@ -104,6 +104,8 @@
 
   var Store = {
     raw: { config: {}, chores: {}, absences: {}, updates: {}, occurrences: {} },
+    db: null,            // the Claude artifact's own store, when the page runs there
+    backend: 'local',    // 'artifact' | 'cloud' | 'local'
     ready: false,
     shared: false,
     offline: false,
@@ -113,6 +115,7 @@
     onChange: function () {},
 
     start: function (onChange) {
+      var self = this;
       this.onChange = onChange;
 
       // Paint from whatever this browser saw last, so the board is never blank
@@ -121,12 +124,65 @@
       if (cached && cached.config) { this.raw = cached; this.ready = true; this.onChange(); }
 
       Cloud.cfg = window.EPHESUS || null;
+
+      // Inside the Claude viewer the page has its own store; on any other host
+      // it does not, and the database in config.js takes over.
+      if (window.claude && window.claude.use) {
+        window.claude.use('db').then(function (db) {
+          if (db) self.startArtifact(db);
+          else if (Cloud.ok()) self.startCloud();
+          else self.startLocal();
+        }).catch(function () {
+          if (Cloud.ok()) self.startCloud(); else self.startLocal();
+        });
+        return;
+      }
+
       if (Cloud.ok()) this.startCloud();
       else this.startLocal();
     },
 
+    /* The Claude artifact's own store: live, no polling. */
+    startArtifact: function (db) {
+      var self = this;
+      this.db = db;
+      this.backend = 'artifact';
+      this.shared = true;
+
+      var expect = ['config/house', 'config/reminders', 'chores', 'absences', 'updates', 'occurrences'];
+      var seen = {};
+      function settle(key) {
+        seen[key] = true;
+        if (!self.ready) self.ready = expect.every(function (k) { return seen[k]; });
+        self.persistLocal();
+        self.onChange();
+      }
+
+      ['house', 'reminders'].forEach(function (id) {
+        var key = 'config/' + id;
+        db.doc(key).onSnapshot(function (snap) {
+          self.raw.config[id] = snap.exists ? snap.data() : null;
+          settle(key);
+        }, function () { settle(key); });
+      });
+
+      ['chores', 'absences', 'updates', 'occurrences'].forEach(function (name) {
+        db.collection(name).onSnapshot(function (snap) {
+          var next = {};
+          snap.docs.forEach(function (d) { next[d.id] = d.data(); });
+          self.raw[name] = next;
+          settle(name);
+        }, function () { settle(name); });
+      });
+
+      setTimeout(function () {
+        if (!self.ready) { self.ready = true; self.onChange(); }
+      }, 12000);
+    },
+
     startCloud: function () {
       var self = this;
+      this.backend = 'cloud';
       this.shared = true;
       this.pull();
 
@@ -170,6 +226,7 @@
        the snapshot shipped with the page, so it is never empty. */
     startLocal: function (force) {
       var self = this;
+      this.backend = 'local';
       this.shared = false;
 
       if (!force) {
@@ -212,6 +269,13 @@
       this.persistLocal();
       this.onChange();
 
+      if (this.db) {
+        return this.db.doc(path).set(data).catch(function (err) {
+          self.lastError = (err && err.message) || 'the write was refused';
+          App.flash('That did not save. ' + self.lastError);
+        });
+      }
+
       if (!Cloud.ok()) return Promise.resolve();
       this.pending++;
       return Cloud.put(path, data).then(function () {
@@ -241,6 +305,13 @@
       this.persistLocal();
       this.onChange();
 
+      if (this.db) {
+        return this.db.doc(path).delete().catch(function (err) {
+          self.lastError = (err && err.message) || 'the delete was refused';
+          App.flash('That did not save. ' + self.lastError);
+        });
+      }
+
       if (!Cloud.ok()) return Promise.resolve();
       this.pending++;
       return Cloud.del(path).then(function () {
@@ -258,7 +329,9 @@
     persistLocal: function () {
       var raw = this.raw;
       safeLocal(function () { localStorage.setItem(CACHE_KEY, JSON.stringify(raw)); });
-      if (!Cloud.ok()) safeLocal(function () { localStorage.setItem(LOCAL_KEY, JSON.stringify(raw)); });
+      if (!this.db && !Cloud.ok()) {
+        safeLocal(function () { localStorage.setItem(LOCAL_KEY, JSON.stringify(raw)); });
+      }
     }
   };
 
@@ -925,7 +998,10 @@
       if (Store.shared) {
         out += '<div class="sec"><p class="hint">' +
           'Everything on this board is shared. Ivan, Jett and Demitrius all see the ' +
-          'same thing within a few seconds of any change.</p></div>';
+          'same thing within a few seconds of any change.' +
+          (Store.backend === 'artifact'
+            ? ' This copy syncs through Claude, so it needs a Claude account.'
+            : '') + '</p></div>';
       } else {
         out += '<div class="sec"><div class="sec-head"><h2>This copy</h2></div>' +
           '<div class="panel"><div class="form">' +

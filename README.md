@@ -6,14 +6,19 @@ It answers one question the whiteboard could not: **who is on what this week,
 given who is actually home.** Mark someone away and the board reassigns their
 turns and keeps the rotation fair, with no erasing and rewriting.
 
-- **The board:** https://claudekovalenko.github.io/ephesus-house-oc/
-  — shared across every phone, no account needed. This is the link to hand out.
+- **The board (Claude):** https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN
+  — works today. Syncs through Claude, so it needs a Claude account that can
+  reach the owner's organisation.
+- **The board (GitHub Pages):** https://claudekovalenko.github.io/ephesus-house-oc/
+  — same app against Postgres, shared with anyone who has the link, no account.
+  **Not confirmed reachable yet**: every layer reports success (workflow, upload,
+  deployment, environment URL) but the site does not answer. If it 404s, check
+  Settings → Pages → Build and deployment → Source is set to *GitHub Actions*.
 - **Connection check:** https://claudekovalenko.github.io/ephesus-house-oc/check.html
   — open this if the board misbehaves. It reports, in order, whether the settings
   file loaded, whether the key is the right shape, and what the database actually
   answered for a read, a write and a delete.
-- The old https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN link is now just a
-  signpost pointing at the board, so anyone who still has it gets through.
+
 - **Product requirements:** [`docs/PRD.md`](docs/PRD.md)
 - **The original board:** [`docs/assets/whiteboard-2026-09.jpg`](docs/assets/whiteboard-2026-09.jpg)
   and [the reminders corner](docs/assets/whiteboard-2026-09-reminders.jpg)
