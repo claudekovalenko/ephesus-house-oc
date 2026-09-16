@@ -84,7 +84,7 @@
     "deep-bathroom": {
       "anchorDate": "2026-09-14",
       "anchorPerson": "jett",
-      "cadence": "biweekly",
+      "cadence": "monthly",
       "checklist": [
         "Clean the shower",
         "Clean the shower door",
@@ -92,10 +92,9 @@
         "Clean the sink and counter",
         "Sweep and mop the floor"
       ],
-      "holdPeriod": "month",
       "isZone": false,
-      "mode": "rotate",
-      "name": "Deep clean the bathroom",
+      "mode": "everyone",
+      "name": "Bathroom, a proper clean",
       "note": "",
       "order": 11,
       "undated": true,
@@ -104,7 +103,7 @@
     "deep-kitchen": {
       "anchorDate": "2026-09-14",
       "anchorPerson": "ivan",
-      "cadence": "biweekly",
+      "cadence": "monthly",
       "checklist": [
         "Sweep and mop the floor",
         "Clear the counters and clean them fully, under everything",
@@ -112,10 +111,9 @@
         "Wipe down the tables",
         "Clean the stove"
       ],
-      "holdPeriod": "month",
       "isZone": false,
-      "mode": "rotate",
-      "name": "Deep clean the kitchen",
+      "mode": "everyone",
+      "name": "Kitchen, a proper clean",
       "note": "",
       "order": 10,
       "undated": true,
@@ -124,17 +122,16 @@
     "deep-living": {
       "anchorDate": "2026-09-14",
       "anchorPerson": "demitrius",
-      "cadence": "biweekly",
+      "cadence": "monthly",
       "checklist": [
         "Dust",
         "Dust the fans",
         "Vacuum",
         "Wipe down the tables"
       ],
-      "holdPeriod": "month",
       "isZone": false,
-      "mode": "rotate",
-      "name": "Deep clean the living and dining room",
+      "mode": "everyone",
+      "name": "Living and dining room, a proper clean",
       "note": "",
       "order": 12,
       "undated": true,

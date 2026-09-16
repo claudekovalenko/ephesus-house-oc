@@ -475,3 +475,43 @@ test('an undated chore still hands over at the month boundary when away', () => 
   assert.strictEqual(a['2026-09-14'].coveringFor, IVAN);
   assert.strictEqual(a['2026-10-12'].assignee, IVAN);  // back, still up next
 });
+
+/* ---------- unassigned standing work ("help out if you're free") ---------- */
+
+test('an everyone-mode standing chore belongs to nobody', () => {
+  const st = baseState({
+    chores: [Object.assign(standingDeep(), { mode: 'everyone', cadence: 'monthly' })]
+  });
+  const item = R.standing(st, '2026-09-16')[0];
+  assert.strictEqual(item.assignee, null);
+  assert.strictEqual(item.shared, true);
+  assert.strictEqual(item.coveringFor, null);
+});
+
+test('unassigned work never lands in anyone’s fairness count', () => {
+  const st = baseState({
+    chores: [Object.assign(standingDeep(), { mode: 'everyone', cadence: 'monthly' }), trash()]
+  });
+  const t = R.tally(st, '2026-10-31', 12);
+  const total = Object.keys(t).reduce((n, k) => n + t[k].assigned, 0);
+  // only the weekly trash counts; the clean is nobody's turn
+  assert.strictEqual(total, Object.keys(R.assignAll(st, '2026-10-31').trash)
+    .filter((d) => d >= R.addDays('2026-10-31', -84)).length);
+});
+
+test('a monthly standing chore clears its ticks each month', () => {
+  const st = baseState({
+    chores: [Object.assign(standingDeep(), { mode: 'everyone', cadence: 'monthly' })],
+    occurrences: { 'deep-kitchen__2026-09-01': { checked: { 0: true, 1: true } } }
+  });
+  assert.deepStrictEqual(R.standing(st, '2026-09-20')[0].checked, { 0: true, 1: true });
+  assert.deepStrictEqual(R.standing(st, '2026-10-05')[0].checked, {});
+  assert.strictEqual(R.standing(st, '2026-10-05')[0].span.start, '2026-10-01');
+});
+
+test('unassigned standing work still stays out of the day rows', () => {
+  const wk = R.buildWeek(baseState({
+    chores: [Object.assign(standingDeep(), { mode: 'everyone', cadence: 'monthly' }), trash()]
+  }), '2026-09-16');
+  assert.deepStrictEqual(wk.days.flatMap((d) => d.items.map((i) => i.chore.id)), ['trash']);
+});

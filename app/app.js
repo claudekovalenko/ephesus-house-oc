@@ -562,13 +562,16 @@
       /* standing work with no set day */
       var standing = R.standing(s, today);
       if (standing.length) {
-        var holdNote = standing.some(function (x) { return R.holdOf(x.chore) === 'month'; })
+        var anyHeld = standing.some(function (x) { return !x.shared; });
+        var holdNote = anyHeld
           ? 'Whoever holds an area keeps it for the whole month, then it moves on. ' +
             'Do it any time before the window runs out.'
-          : 'Do it any time before the window runs out.';
-        out += '<div class="sec"><div class="sec-head"><h2>Deep clean</h2>' +
-          '<span class="aside">' + monthName(today) + '</span></div>' +
-          '<div class="panel"><div class="items">' +
+          : 'Nobody is on these. If you have got time, pick something off and tick it. ' +
+            'The ticks clear at the start of each month.';
+        out += '<div class="sec"><div class="sec-head">' +
+          '<h2>' + (anyHeld ? 'Deep clean' : 'If you are free') + '</h2>' +
+          (anyHeld ? '<span class="aside">' + monthName(today) + '</span>' : '') +
+          '</div><div class="panel"><div class="items">' +
           standing.map(this.itemHTML, this).join('') + '</div></div>' +
           '<p class="hint" style="margin-top:8px">' + holdNote + '</p></div>';
       }
@@ -647,10 +650,10 @@
       var ch = item.chore;
 
       var meta = '';
-      if (item.span) {
+      if (item.span && !item.shared) {
         meta += '<span class="when">' + pretty(item.span.start) + ' \u2013 ' +
           pretty(item.span.end) + '</span>';
-        if (item.daysLeft != null && !item.doneAt) {
+        if (item.daysLeft != null && !item.doneAt && !item.shared) {
           meta += '<span class="tag ' + (item.daysLeft <= 3 ? 'late' : 'quiet') + '">' +
             (item.daysLeft < 0 ? 'window closed'
               : item.daysLeft === 0 ? 'last day'

@@ -57,12 +57,17 @@ This is the initial data the app ships with. Everything here must be editable in
 | Thursday | Bring in cans | In the morning. Handles toward the street. |
 | Friday | *(see reminders)* | Street sweeping — see §4.5. It is a standing reminder, not an assigned turn. |
 
-### 4.3 Deep clean (added 2026-09-14, not from the board)
+### 4.3 The proper clean (added 2026-09-14, not from the board)
 
-Every two weeks, with **no set day**: the fortnight is the unit, and it gets done
-whenever suits inside it. Each area is held by one person for a whole month, which
-is two fortnights, so the holder does both before it moves on. Starting holders:
-kitchen Ivan, bathroom Jett, living and dining Demitrius.
+**Nobody is assigned.** Three areas sit on the board as a standing list of jobs;
+whoever has time picks something off and ticks it. No owner, no date, no deadline.
+Ticks clear at the start of each month so the list does not read as permanently
+done.
+
+> Changed 2026-09-16: this began as a deep clean every two weeks, each area held
+> by one person for a month. The house dropped the rotation — "we aren't going to
+> do the deep clean any more, but if you are free then help out with those
+> things" — so the schedule and the assignment went and the jobs stayed.
 
 | Area | Jobs |
 |---|---|
@@ -70,9 +75,9 @@ kitchen Ivan, bathroom Jett, living and dining Demitrius.
 | Bathroom | Clean the shower · clean the shower door · clean the toilet, and get behind it · clean the sink and counter · sweep and mop the floor |
 | Living and dining room | Dust · dust the fans · vacuum · wipe down the tables |
 
-> First built as a dated Saturday job; the house corrected it. A deep clean is
-> kept, not scheduled, so it now shows as a window with days remaining rather than
-> sitting in a day row.
+> It was first a dated Saturday job, then a fortnightly window held for a month,
+> and is now unassigned entirely. Each step removed scheduling the house did not
+> want.
 
 ### 4.4 Rotating zones (removed)
 
@@ -153,8 +158,9 @@ Priority: **P0** = must ship in v1. **P1** = should ship in v1 if cheap. **P2** 
 - Section "**This week**": Monday through Sunday, each day listing its chores and assignees.
 - Section "**Zones this week**": any week-held chore and its holder. Hidden when
   there are none, which is the current state.
-- Section "**Deep clean**": each area, who holds it this month, the current
-  window and days left, and its checklist.
+- Section "**If you are free**": each area with its checklist, no owner and no
+  deadline. It becomes "**Deep clean**", with holders and days left, if any
+  standing chore is ever assigned again.
 - Section "**Special tasks**": open one-off tasks, sorted by due date, overdue first.
 - Section "**Reminders**": every group open, every item visible.
 - A person filter ("just show me mine") that persists on the device.
@@ -270,10 +276,9 @@ they take the next period rather than losing the turn.
 
 - **Zones** hold for a week, one occurrence per week at the week start. None are
   defined right now; the kitchen sink and bathroom zones were removed (§4.4).
-- **Deep clean** (kitchen, bathroom, living and dining room) happens every two
-  weeks but holds for a month, so the same person does every deep clean of their
-  area that month before it moves on. With three areas and three housemates,
-  everyone holds exactly one area at a time.
+- **The proper clean** is held by nobody: `mode: everyone`, so it carries no
+  assignee and no countdown. The month-long hold is still supported and tested;
+  it is simply not in use.
 
 ### 7.6b Undated chores
 

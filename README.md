@@ -27,7 +27,7 @@ turns and keeps the rotation fair, with no erasing and rewriting.
 
 | Screen | What it is for |
 |---|---|
-| **Board** | Today, the deep clean, the week day by day, open special tasks, every reminder, and a four-week fairness check |
+| **Board** | Today, the unassigned jobs anyone can help with, the week day by day, open special tasks, every reminder, and a four-week fairness check |
 | **Special tasks** | One-off tasks with due dates. "Next in rotation" picks whoever is up and home |
 | **Away** | Date ranges per housemate, with a preview of exactly what moves before you save |
 | **Settings** | Housemates, rotation order, chores, reminders, week start, time zone |
@@ -42,10 +42,9 @@ covered does not silently end up doing more forever.
 Worked through in [`docs/PRD.md`](docs/PRD.md) §7, and locked down by the tests.
 
 A chore can also be **held** for a week or a month rather than reassigned every
-time, and it can have **no set day** at all. The deep clean is both: it comes round
-every two weeks and is held for a month, so the same person does both of that
-month's before it moves on, and each one is a window to finish rather than a dated
-job. The board shows it as days remaining, not a date. Availability over a held
+time, and it can have **no set day** at all. Both are supported and tested, and
+neither is currently in use: the three cleaning areas are `mode: everyone`, so
+they belong to nobody and show as a plain list of jobs to help with. Availability over a held
 period is one rule: you keep it if you are home for at least half of it. A
 week-long hold is a zone; none are defined at the moment, but the board still
 shows them if you add one.
