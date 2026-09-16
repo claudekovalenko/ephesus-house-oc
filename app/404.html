@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ephesus House Chores</title>
+<link rel="stylesheet" href="/ephesus-house-oc/styles.css">
+<style>
+  body { display: grid; place-items: center; min-height: 100vh; padding: 32px 18px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 26px 22px; max-width: 420px; width: 100%;
+    display: flex; flex-direction: column; gap: 13px; box-shadow: var(--shadow-lift);
+  }
+  .mark { display: flex; align-items: center; gap: 9px; }
+  .mark span { width: 9px; height: 9px; border-radius: 50%; background: var(--marker); }
+  .mark b { font-family: var(--display); font-size: 1.0625rem; letter-spacing: -.015em; }
+  h1 { font-size: 1.375rem; letter-spacing: -.02em; }
+  p { margin: 0; color: var(--muted); font-size: .9375rem; }
+  .ok {
+    font-family: var(--mono); font-size: .75rem; color: var(--good);
+    border: 1px dashed var(--good); border-radius: 9px; padding: 9px 11px;
+  }
+  a.go {
+    display: block; text-align: center; text-decoration: none; margin-top: 4px;
+    background: var(--marker); color: #fff; font-weight: 600;
+    border-radius: 10px; padding: 13px 16px;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="mark"><span></span><b>Ephesus House</b></div>
+    <h1>No page at that address</h1>
+    <p class="ok">The site itself is up and serving. Only this particular path is wrong.</p>
+    <p>If you were sent here by a link, the board is one tap away.</p>
+    <a class="go" href="/ephesus-house-oc/">Open the chore board</a>
+  </div>
+</body>
+</html>
