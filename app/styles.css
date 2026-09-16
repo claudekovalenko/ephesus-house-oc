@@ -299,6 +299,29 @@ select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
 
 /* ---------- reminders ---------- */
 
+details.quiet {
+  background: var(--surface); border: 1px solid var(--line-soft);
+  border-radius: var(--radius); overflow: hidden;
+}
+details.quiet > summary {
+  list-style: none; cursor: pointer; padding: 13px 14px;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+}
+details.quiet > summary::-webkit-details-marker { display: none; }
+details.quiet > summary::after {
+  content: "+"; color: var(--muted); font-size: 1rem; line-height: 1; flex: none;
+}
+details.quiet[open] > summary::after { content: "\2013"; }
+details.quiet > summary .q-title {
+  font-size: .75rem; text-transform: uppercase; letter-spacing: .13em;
+  color: var(--muted); font-family: var(--display); font-weight: 700;
+}
+details.quiet > summary .q-note {
+  margin-left: auto; margin-right: 10px;
+  font-family: var(--mono); font-size: .6875rem; color: var(--muted);
+}
+details.quiet .items { border-top: 1px solid var(--line-soft); }
+
 .rem-block { border-top: 1px solid var(--line-soft); padding: 14px; }
 .rem-block:first-child { border-top: 0; }
 .rem-block h3 {

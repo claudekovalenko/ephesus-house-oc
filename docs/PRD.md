@@ -158,9 +158,9 @@ Priority: **P0** = must ship in v1. **P1** = should ship in v1 if cheap. **P2** 
 - Section "**This week**": Monday through Sunday, each day listing its chores and assignees.
 - Section "**Zones this week**": any week-held chore and its holder. Hidden when
   there are none, which is the current state.
-- Section "**If you are free**": each area with its checklist, no owner and no
-  deadline. It becomes "**Deep clean**", with holders and days left, if any
-  standing chore is ever assigned again.
+- Section "**If you are free**": collapsed by default and placed below the
+  day-to-day, because the homeowner carries most of this and does not use the
+  board. Open it for the areas, their checklists and who last logged a hand.
 - Section "**Special tasks**": open one-off tasks, sorted by due date, overdue first.
 - Section "**Reminders**": every group open, every item visible.
 - A person filter ("just show me mine") that persists on the device.
@@ -302,10 +302,14 @@ instead. Two things are kept:
   survives the monthly clear: last month's tick list goes, the fact that Jett
   finished the kitchen on the 20th stays.
 
-An area shows `last done 4 weeks ago by Jett`, or `not done yet` when nothing has
-ever been finished, and the label turns red past six weeks. That is the answer to
-"nobody is assigned, so how will we know it happened" — and the thing to show
-anyone who asks, the homeowner included.
+An area shows `Jett helped, 4 weeks ago` when someone logged a hand, and says
+nothing at all when nobody has.
+
+> **Silence is not evidence.** The homeowner does most of this and will not be
+> ticking boxes, so an empty tick list means only that nobody logged anything. An
+> earlier version showed `not done yet` in red and turned the label red past six
+> weeks. Both were removed: they read as an accusation about work that had almost
+> certainly been done, just not by someone holding the app.
 
 ### 7.6c Checklists
 

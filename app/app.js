@@ -559,23 +559,6 @@
           }).join('') + '</div></div>';
       }
 
-      /* standing work with no set day */
-      var standing = R.standing(s, today);
-      if (standing.length) {
-        var anyHeld = standing.some(function (x) { return !x.shared; });
-        var holdNote = anyHeld
-          ? 'Whoever holds an area keeps it for the whole month, then it moves on. ' +
-            'Do it any time before the window runs out.'
-          : 'Nobody is on these. If you have got time, pick something off and tick it. ' +
-            'The ticks clear at the start of each month.';
-        out += '<div class="sec"><div class="sec-head">' +
-          '<h2>' + (anyHeld ? 'Deep clean' : 'If you are free') + '</h2>' +
-          (anyHeld ? '<span class="aside">' + monthName(today) + '</span>' : '') +
-          '</div><div class="panel"><div class="items">' +
-          standing.map(this.itemHTML, this).join('') + '</div></div>' +
-          '<p class="hint" style="margin-top:8px">' + holdNote + '</p></div>';
-      }
-
       /* the week */
       var mineOnly = this.mineOnly && this.me;
       out += '<div class="sec"><div class="sec-head"><h2>The week</h2>' +
@@ -624,6 +607,22 @@
             ? '<div class="empty" style="padding:12px"><button class="btn sm" data-act="tab" data-tab="updates">See all ' +
               open.length + '</button></div>' : '') +
           '</div></div>';
+      }
+
+      /* Standing work, kept out of the way: the homeowner does most of it and
+         will not be ticking anything, so it belongs below the day-to-day. */
+      var standing = R.standing(s, today);
+      if (standing.length) {
+        var helped = standing.filter(function (x) { return !!x.lastDone; }).length;
+        out += '<div class="sec"><details class="quiet">' +
+          '<summary><span class="q-title">If you are free</span>' +
+          '<span class="q-note">' + standing.length + ' around the house' +
+          (helped ? ' \u00b7 ' + helped + ' logged lately' : '') + '</span></summary>' +
+          '<div class="items">' + standing.map(this.itemHTML, this).join('') + '</div>' +
+          '<p class="hint" style="padding:12px 14px 14px">' +
+          'Most of this gets handled without the board and without anyone ticking a box. ' +
+          'Tick something only if you pitched in, so it shows up here.</p>' +
+          '</details></div>';
       }
 
       /* fairness */
@@ -680,17 +679,16 @@
           ? '<span class="who"><span class="swatch"></span>' + h(nameOf(s, item.assignee)) + '</span>'
           : '<span class="who nobody">unassigned</span>';
 
-      if (item.lastDone !== undefined) {
-        if (item.lastDone) {
-          var ago = item.daysSinceDone;
-          var when = ago <= 0 ? 'today' : ago === 1 ? 'yesterday'
-            : ago < 14 ? ago + ' days ago'
-            : Math.round(ago / 7) + ' weeks ago';
-          meta += '<span class="tag ' + (ago > 42 ? 'late' : 'quiet') + '">last done ' + h(when) +
-            (item.lastDone.by ? ' by ' + h(nameOf(s, item.lastDone.by)) : '') + '</span>';
-        } else {
-          meta += '<span class="tag late">not done yet</span>';
-        }
+      // Only ever reports what someone logged. Silence is not evidence of
+      // anything: most of this gets done without the board.
+      if (item.lastDone) {
+        var ago = item.daysSinceDone;
+        var when = ago <= 0 ? 'today' : ago === 1 ? 'yesterday'
+          : ago < 14 ? ago + ' days ago'
+          : Math.round(ago / 7) + ' weeks ago';
+        meta += '<span class="tag quiet">' +
+          (item.lastDone.by ? h(nameOf(s, item.lastDone.by)) + ' helped' : 'helped') +
+          ', ' + h(when) + '</span>';
       }
 
       var list = ch.checklist || [];
