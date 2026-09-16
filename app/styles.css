@@ -334,6 +334,10 @@ select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
 .checklist li { display: flex; align-items: flex-start; gap: 8px; font-size: .8125rem;
   color: var(--ink-soft); line-height: 1.4; }
 .checklist .struck { text-decoration: line-through; color: var(--muted); }
+.checklist .by {
+  margin-left: auto; flex: none; padding-left: 8px;
+  font-family: var(--mono); font-size: .625rem; color: var(--muted); white-space: nowrap;
+}
 .tick.tiny { width: 19px; height: 19px; border-radius: 6px; font-size: .625rem; margin-top: 0; }
 
 .deep-row {

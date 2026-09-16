@@ -515,3 +515,50 @@ test('unassigned standing work still stays out of the day rows', () => {
   }), '2026-09-16');
   assert.deepStrictEqual(wk.days.flatMap((d) => d.items.map((i) => i.chore.id)), ['trash']);
 });
+
+/* ---------- the record of what actually got done ---------- */
+
+test('lastDoneOf finds the most recent completion, not the newest window', () => {
+  const st = baseState({
+    chores: [standingDeep()],
+    occurrences: {
+      'deep-kitchen__2026-09-14': { doneAt: '2026-09-18T10:00:00Z', doneBy: JETT },
+      'deep-kitchen__2026-09-28': { doneAt: '2026-10-02T09:00:00Z', doneBy: DEM },
+      'deep-kitchen__2026-10-12': { checked: { 0: true } }          // started, not finished
+    }
+  });
+  const last = R.lastDoneOf(st, 'deep-kitchen');
+  assert.strictEqual(last.by, DEM);
+  assert.strictEqual(last.on, '2026-10-02');
+});
+
+test('lastDoneOf is null when nothing was ever finished', () => {
+  assert.strictEqual(R.lastDoneOf(baseState({ chores: [standingDeep()] }), 'deep-kitchen'), null);
+});
+
+test('lastDoneOf never picks up another chore', () => {
+  const st = baseState({
+    chores: [standingDeep()],
+    occurrences: { 'deep-kitchen-extra__2026-09-14': { doneAt: '2026-09-18T10:00:00Z', doneBy: JETT } }
+  });
+  assert.strictEqual(R.lastDoneOf(st, 'deep-kitchen'), null);
+});
+
+test('the record outlives the window it was done in', () => {
+  const st = baseState({
+    chores: [Object.assign(standingDeep(), { mode: 'everyone', cadence: 'monthly' })],
+    occurrences: { 'deep-kitchen__2026-09-01': { doneAt: '2026-09-20T12:00:00Z', doneBy: IVAN } }
+  });
+  const nextMonth = R.standing(st, '2026-10-15')[0];
+  assert.deepStrictEqual(nextMonth.checked, {});            // fresh window
+  assert.strictEqual(nextMonth.lastDone.by, IVAN);          // record still there
+  assert.strictEqual(nextMonth.daysSinceDone, 25);
+});
+
+test('standing carries who ticked each individual job', () => {
+  const st = baseState({
+    chores: [Object.assign(standingDeep(), { mode: 'everyone', cadence: 'monthly' })],
+    occurrences: { 'deep-kitchen__2026-09-01': { checked: { 0: true }, checkedBy: { 0: JETT } } }
+  });
+  assert.deepStrictEqual(R.standing(st, '2026-09-20')[0].checkedBy, { 0: JETT });
+});

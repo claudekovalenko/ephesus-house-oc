@@ -291,6 +291,22 @@ checklist ticks belong to that window, so a new fortnight starts clean.
 This is the difference between work that has to happen *on Wednesday between four
 and eight* and work that simply has to happen *before the fortnight is out*.
 
+### 7.6b2 The record of what was done
+
+Unassigned work has no owner to chase, so the board has to carry the evidence
+instead. Two things are kept:
+
+- **Who ticked each job**, stored alongside the tick, shown next to it.
+- **When the area was last actually finished, and by whom**, read straight off
+  the completed occurrences. Because a new window is a new occurrence, the record
+  survives the monthly clear: last month's tick list goes, the fact that Jett
+  finished the kitchen on the 20th stays.
+
+An area shows `last done 4 weeks ago by Jett`, or `not done yet` when nothing has
+ever been finished, and the label turns red past six weeks. That is the answer to
+"nobody is assigned, so how will we know it happened" — and the thing to show
+anyone who asks, the homeowner included.
+
 ### 7.6c Checklists
 
 A chore may carry a checklist of the jobs it involves. Ticks are stored per

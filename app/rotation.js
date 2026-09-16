@@ -371,8 +371,29 @@
       away: !!entry.away,
       doneAt: rec ? rec.doneAt : null,
       doneBy: rec ? rec.doneBy : null,
-      checked: (rec && rec.checked) || {}
+      checked: (rec && rec.checked) || {},
+      checkedBy: (rec && rec.checkedBy) || {}
     };
+  }
+
+  /**
+   * When this chore was last actually finished, and by whom — read straight off
+   * the completed occurrences, so it survives the window rolling over. This is
+   * the answer to "has anyone cleaned the kitchen lately".
+   */
+  function lastDoneOf(state, choreId) {
+    var done = state.occurrences || {};
+    var prefix = choreId + '__';
+    var best = null;
+    Object.keys(done).forEach(function (key) {
+      if (key.indexOf(prefix) !== 0) return;
+      var rec = done[key];
+      if (!rec || !rec.doneAt) return;
+      if (!best || rec.doneAt > best.at) {
+        best = { at: rec.doneAt, on: String(rec.doneAt).slice(0, 10), by: rec.doneBy || null };
+      }
+    });
+    return best;
   }
 
   /** The stretch of days one undated occurrence covers. */
@@ -407,6 +428,8 @@
       var item = decorate(ch, cur, byDate[cur], done, state);
       item.span = spanOf(ch, cur, ctx);
       item.daysLeft = diffDays(onDate, item.span.end);
+      item.lastDone = lastDoneOf(state, ch.id);
+      item.daysSinceDone = item.lastDone ? diffDays(item.lastDone.on, onDate) : null;
       var later = dates.filter(function (d) { return d > cur; });
       item.nextStart = later.length ? later[0] : null;
       item.nextAssignee = later.length ? byDate[later[0]].assignee : null;
@@ -547,6 +570,7 @@
     isAway: isAway, awayDaysInWeek: awayDaysInWeek,
     periodRange: periodRange, availableForPeriod: availableForPeriod, holdOf: holdOf,
     heldThisMonth: heldThisMonth, standing: standing, spanOf: spanOf,
+    lastDoneOf: lastDoneOf,
     occurrenceDates: occurrenceDates, assignChore: assignChore, assignAll: assignAll,
     buildWeek: buildWeek, occurrenceKey: occurrenceKey,
     tally: tally, isBalanced: isBalanced,

@@ -680,6 +680,19 @@
           ? '<span class="who"><span class="swatch"></span>' + h(nameOf(s, item.assignee)) + '</span>'
           : '<span class="who nobody">unassigned</span>';
 
+      if (item.lastDone !== undefined) {
+        if (item.lastDone) {
+          var ago = item.daysSinceDone;
+          var when = ago <= 0 ? 'today' : ago === 1 ? 'yesterday'
+            : ago < 14 ? ago + ' days ago'
+            : Math.round(ago / 7) + ' weeks ago';
+          meta += '<span class="tag ' + (ago > 42 ? 'late' : 'quiet') + '">last done ' + h(when) +
+            (item.lastDone.by ? ' by ' + h(nameOf(s, item.lastDone.by)) : '') + '</span>';
+        } else {
+          meta += '<span class="tag late">not done yet</span>';
+        }
+      }
+
       var list = ch.checklist || [];
       var sub = '';
       if (list.length) {
@@ -694,10 +707,12 @@
           (isOpen
             ? '<ul class="checklist">' + list.map(function (txt, n2) {
                 var on = !!item.checked[n2];
+                var who = on && item.checkedBy[n2] ? nameOf(s, item.checkedBy[n2]) : null;
                 return '<li><button class="tick tiny' + (on ? ' on' : '') +
                   '" data-act="check" data-key="' + h(item.key) + '" data-i="' + n2 +
                   '" aria-pressed="' + (on ? 'true' : 'false') + '" aria-label="' + h(txt) + '">\u2713</button>' +
-                  '<span' + (on ? ' class="struck"' : '') + '>' + h(txt) + '</span></li>';
+                  '<span' + (on ? ' class="struck"' : '') + '>' + h(txt) + '</span>' +
+                  (who ? '<span class="by">' + h(who) + '</span>' : '') + '</li>';
               }).join('') + '</ul>'
             : '') +
           '</div>';
@@ -1212,7 +1227,7 @@
           if (rec && rec.doneAt) {
             var rest = Object.assign({}, rec);
             delete rest.doneAt; delete rest.doneBy;
-            if (list.length) rest.checked = {};      // ticking off clears the checklist too
+            if (list.length) { rest.checked = {}; rest.checkedBy = {}; }  // clears the list too
             var meaningful = Object.keys(rest).filter(function (k) {
               return k !== 'choreId' && k !== 'date' &&
                 !(k === 'checked' && !Object.keys(rest.checked || {}).length);
@@ -1220,11 +1235,12 @@
             if (meaningful.length) Store.set('occurrences/' + key, rest);
             else Store.remove('occurrences/' + key);
           } else {
-            var all = {};
-            for (var n = 0; n < list.length; n++) all[n] = true;
+            var all = {}, allBy = {};
+            for (var n = 0; n < list.length; n++) { all[n] = true; allBy[n] = this.me || null; }
             Store.set('occurrences/' + key, Object.assign({}, rec, {
               choreId: parts[0], date: parts[1],
               checked: list.length ? all : (rec && rec.checked) || {},
+              checkedBy: list.length ? allBy : (rec && rec.checkedBy) || {},
               doneAt: new Date().toISOString(),
               doneBy: this.me || null
             }));
@@ -1245,12 +1261,14 @@
           var total = ((chore && chore.checklist) || []).length;
 
           var checked = Object.assign({}, rec.checked || {});
-          if (checked[idx]) delete checked[idx]; else checked[idx] = true;
+          var checkedBy = Object.assign({}, rec.checkedBy || {});
+          if (checked[idx]) { delete checked[idx]; delete checkedBy[idx]; }
+          else { checked[idx] = true; checkedBy[idx] = this.me || null; }
 
           // The occurrence is done exactly when every job on it is done.
           var complete = total > 0 && Object.keys(checked).length >= total;
           Store.set('occurrences/' + key, Object.assign({}, rec, {
-            choreId: parts[0], date: parts[1], checked: checked,
+            choreId: parts[0], date: parts[1], checked: checked, checkedBy: checkedBy,
             doneAt: complete ? (rec.doneAt || new Date().toISOString()) : null,
             doneBy: complete ? (rec.doneBy || this.me || null) : null
           }));
