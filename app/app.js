@@ -387,6 +387,7 @@
     state: null,
     draft: {},
     editingChore: null,
+    editingAbsence: null,
     openItems: {},
     flashMsg: null,
 
@@ -561,10 +562,22 @@
 
       /* the week */
       var mineOnly = this.mineOnly && this.me;
+      var awayNow = s.absences.filter(function (a) {
+        return a.start <= wk.end && a.end >= wk.start;
+      }).sort(function (a, b) { return a.start < b.start ? -1 : 1; });
+
       out += '<div class="sec"><div class="sec-head"><h2>The week</h2>' +
         (this.me ? '<button class="btn sm" data-act="mine" aria-pressed="' + (this.mineOnly ? 'true' : 'false') +
           '">' + (this.mineOnly ? 'Showing mine' : 'Just mine') + '</button>' : '') +
-        '</div><div class="week">';
+        '</div>' +
+        (awayNow.length
+          ? '<div class="awaystrip">' + awayNow.map(function (a) {
+              return '<span class="who" style="--c:' + h(colorOf(s, a.housemateId)) + '">' +
+                '<span class="swatch"></span>' + h(nameOf(s, a.housemateId)) + '</span>' +
+                '<span class="range">away ' + pretty(a.start) + '\u2013' + pretty(a.end) + '</span>';
+            }).join('') + '</div>'
+          : '') +
+        '<div class="week">';
 
       out += wk.days.map(function (day) {
         var items = day.items;
@@ -832,9 +845,19 @@
       var d = this.draft;
       var whoDefault = d.aWho || this.me || s.rotation[0] || '';
 
+      var editing = this.editingAbsence
+        ? s.absences.filter(function (a) { return a.id === App.editingAbsence; })[0] || null
+        : null;
+      if (this.editingAbsence && !editing) this.editingAbsence = null;
+
       var preview = '';
       if (whoDefault && d.aStart && d.aEnd && d.aEnd >= d.aStart) {
-        var all = R.previewAbsence(s, {
+        var base = editing
+          ? Object.assign({}, s, {
+              absences: s.absences.filter(function (a) { return a.id !== editing.id; })
+            })
+          : s;
+        var all = R.previewAbsence(base, {
           housemateId: whoDefault, start: d.aStart, end: d.aEnd
         });
         var during = all.filter(function (c) { return c.date <= d.aEnd; });
@@ -849,8 +872,7 @@
         };
         preview = '<div class="preview"><h4>While they are away</h4>' +
           (during.length
-            ? during.slice(0, 5).map(line).join('') +
-              (during.length > 5 ? '<p class="chg">and ' + (during.length - 5) + ' more</p>' : '')
+            ? during.map(line).join('')
             : '<p>Nothing moves. None of their turns fall in those dates.</p>') +
           (after.length
             ? '<h4 style="margin-top:6px">After they are back</h4>' +
@@ -861,7 +883,10 @@
           '</div>';
       }
 
-      var out = '<div class="sec"><div class="sec-head"><h2>Mark someone away</h2></div>' +
+      var out = '<div class="sec"><div class="sec-head"><h2>' +
+        (editing ? 'Change this trip' : 'Mark someone away') + '</h2>' +
+        (editing ? '<span class="aside">' + h(nameOf(s, editing.housemateId)) + '</span>' : '') +
+        '</div>' +
         '<div class="panel"><div class="form">' +
         '<div class="field"><label>Who</label><div class="seg">' +
         s.rotation.map(function (id) {
@@ -878,9 +903,12 @@
         '<input type="text" id="a-note" data-draft="aNote" value="' + h(d.aNote || '') +
         '" placeholder="In SF for work"></div>' +
         preview +
-        '<div class="btn-row"><button class="btn primary" data-act="aadd">Save</button></div>' +
+        '<div class="btn-row"><button class="btn primary" data-act="aadd">' +
+        (editing ? 'Save changes' : 'Save') + '</button>' +
+        (editing ? '<button class="btn" data-act="acancel">Cancel</button>' : '') + '</div>' +
         '<p class="hint">Whoever is away is skipped but keeps their place, so they pick up ' +
-        'their turn as soon as they are back.</p>' +
+        'their turn as soon as they are back. Plans change \u2014 edit a trip any time and ' +
+        'the board works itself out again.</p>' +
         '</div></div></div>';
 
       var upcoming = s.absences.filter(function (a) { return a.end >= today; })
@@ -889,13 +917,19 @@
         .sort(function (a, b) { return a.start > b.start ? -1 : 1; });
 
       function row(a) {
-        return '<div class="absence"><span class="swatch" style="background:' +
-          h(colorOf(s, a.housemateId)) + '"></span><div class="a-main">' +
-          '<div class="a-when">' + h(nameOf(s, a.housemateId)) + ' · ' +
-          pretty(a.start) + ' – ' + pretty(a.end) + '</div>' +
-          (a.note ? '<div class="a-note">' + h(a.note) + '</div>' : '') + '</div>' +
+        var days = R.diffDays(a.start, a.end) + 1;
+        var live = a.start <= today && a.end >= today;
+        return '<div class="absence' + (live ? ' is-now' : '') + '">' +
+          '<span class="swatch" style="background:' + h(colorOf(s, a.housemateId)) + '"></span>' +
+          '<div class="a-main">' +
+          '<div class="a-when">' + h(nameOf(s, a.housemateId)) + ' \u00b7 ' +
+          pretty(a.start) + ' \u2013 ' + pretty(a.end) + '</div>' +
+          '<div class="a-note">' + days + (days === 1 ? ' day' : ' days') +
+          (live ? ' \u00b7 away right now' : '') +
+          (a.note ? ' \u00b7 ' + h(a.note) : '') + '</div></div>' +
+          '<button class="btn sm" data-act="aedit" data-id="' + h(a.id) + '">Edit</button>' +
           '<button class="u-del" data-act="adel" data-id="' + h(a.id) +
-          '" aria-label="Remove this absence">✕</button></div>';
+          '" aria-label="Remove this trip">\u2715</button></div>';
       }
 
       out += '<div class="sec"><div class="sec-head"><h2>Current and upcoming</h2></div><div class="panel">' +
@@ -904,7 +938,7 @@
 
       if (past.length) {
         out += '<div class="sec"><div class="sec-head"><h2>Past</h2></div><div class="panel">' +
-          past.slice(0, 10).map(row).join('') + '</div></div>';
+          past.slice(0, 20).map(row).join('') + '</div></div>';
       }
       return out;
     },
@@ -1312,15 +1346,44 @@
           var start = this.draft.aStart, end = this.draft.aEnd;
           if (!who || !start || !end) { this.flash('Pick a person and both dates.'); return; }
           if (end < start) { this.flash('The end date is before the start date.'); return; }
-          Store.set('absences/' + uid('a'), {
-            housemateId: who, start: start, end: end,
-            note: (this.draft.aNote || '').trim(), createdAt: new Date().toISOString()
-          });
-          this.draft.aStart = ''; this.draft.aEnd = ''; this.draft.aNote = '';
+          if (this.editingAbsence) {
+            Store.merge('absences/' + this.editingAbsence, {
+              housemateId: who, start: start, end: end,
+              note: (this.draft.aNote || '').trim()
+            });
+            this.editingAbsence = null;
+          } else {
+            Store.set('absences/' + uid('a'), {
+              housemateId: who, start: start, end: end,
+              note: (this.draft.aNote || '').trim(), createdAt: new Date().toISOString()
+            });
+          }
+          this.draft.aWho = ''; this.draft.aStart = ''; this.draft.aEnd = ''; this.draft.aNote = '';
           this.render();
         },
 
-        adel: function () { Store.remove('absences/' + btn.dataset.id); },
+        adel: function () {
+          if (this.editingAbsence === btn.dataset.id) this.editingAbsence = null;
+          Store.remove('absences/' + btn.dataset.id);
+        },
+
+        aedit: function () {
+          var a = s.absences.filter(function (x) { return x.id === btn.dataset.id; })[0];
+          if (!a) return;
+          this.editingAbsence = a.id;
+          this.draft.aWho = a.housemateId;
+          this.draft.aStart = a.start;
+          this.draft.aEnd = a.end;
+          this.draft.aNote = a.note || '';
+          window.scrollTo(0, 0);
+          this.render();
+        },
+
+        acancel: function () {
+          this.editingAbsence = null;
+          this.draft.aWho = ''; this.draft.aStart = ''; this.draft.aEnd = ''; this.draft.aNote = '';
+          this.render();
+        },
 
         move: function () {
           var id = btn.dataset.id, d = +btn.dataset.d;

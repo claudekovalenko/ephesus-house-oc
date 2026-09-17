@@ -185,6 +185,12 @@ Priority: **P0** = must ship in v1. **P1** = should ship in v1 if cheap. **P2** 
 ### 6.4 Absences (exceptions) — P0
 
 - A housemate marks themselves away with a start date and end date (inclusive). Optional note ("in SF for work").
+- **A trip can be edited after it is saved**: dates, person and note. Plans change,
+  and deleting and retyping a trip to come home two days early is not a feature.
+  While editing, the preview compares against the board *without* that trip, so it
+  shows what the change does rather than nothing at all.
+- Each trip shows how many days it covers and whether it is running right now.
+- The board itself names who is away in the week being viewed, above the day list.
 - While away they are skipped for any occurrence whose date falls in the range.
 - The app must show, on the board, that an occurrence was reassigned because of an absence (small "covering for Ivan" label).
 - Editing or deleting an absence recomputes the affected weeks.
@@ -405,7 +411,10 @@ These do not block M0–M2. Defaults are stated so work can proceed.
 
 ## 14. What shipped
 
-Built and published at https://claudekovalenko.github.io/ephesus-house-oc/.
+Built and served at https://dmiysgmhwpkrunmswtrn.supabase.co/functions/v1/board/,
+by an edge function that proxies `app/` from the repository. GitHub Pages was
+tried first and abandoned: five deployments all reported success and the site
+never answered a request.
 
 Stack differs from §11 in one way: plain HTML, CSS and JavaScript rather than
 Vite and React, which would have bought nothing at this size. Supabase is as

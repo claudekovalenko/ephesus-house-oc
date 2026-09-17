@@ -14,9 +14,6 @@ turns and keeps the rotation fair, with no erasing and rewriting.
 - **On Claude:** https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN — the same
   app, but its store only works for people signed in to the owner's Claude
   organisation, so it is not the one to share.
-- **On GitHub Pages:** https://claudekovalenko.github.io/ephesus-house-oc/ — every
-  deployment reports success and the site has never answered. Unresolved; the
-  Supabase link above replaces it.
 
 - **Product requirements:** [`docs/PRD.md`](docs/PRD.md)
 - **The original board:** [`docs/assets/whiteboard-2026-09.jpg`](docs/assets/whiteboard-2026-09.jpg)
