@@ -6,18 +6,17 @@ It answers one question the whiteboard could not: **who is on what this week,
 given who is actually home.** Mark someone away and the board reassigns their
 turns and keeps the rotation fair, with no erasing and rewriting.
 
-- **The board (Claude):** https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN
-  — works today. Syncs through Claude, so it needs a Claude account that can
-  reach the owner's organisation.
-- **The board (GitHub Pages):** https://claudekovalenko.github.io/ephesus-house-oc/
-  — same app against Postgres, shared with anyone who has the link, no account.
-  **Not confirmed reachable yet**: every layer reports success (workflow, upload,
-  deployment, environment URL) but the site does not answer. If it 404s, check
-  Settings → Pages → Build and deployment → Source is set to *GitHub Actions*.
-- **Connection check:** https://claudekovalenko.github.io/ephesus-house-oc/check.html
-  — open this if the board misbehaves. It reports, in order, whether the settings
-  file loaded, whether the key is the right shape, and what the database actually
-  answered for a read, a write and a delete.
+- **The board:** https://dmiysgmhwpkrunmswtrn.supabase.co/functions/v1/board/
+  — the link to hand out. No account, no sign-in, any browser. Verified end to
+  end: the page and every asset serve, and an anonymous visitor can both read
+  the board and write to it.
+- **Connection check:** https://dmiysgmhwpkrunmswtrn.supabase.co/functions/v1/board/check.html
+- **On Claude:** https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN — the same
+  app, but its store only works for people signed in to the owner's Claude
+  organisation, so it is not the one to share.
+- **On GitHub Pages:** https://claudekovalenko.github.io/ephesus-house-oc/ — every
+  deployment reports success and the site has never answered. Unresolved; the
+  Supabase link above replaces it.
 
 - **Product requirements:** [`docs/PRD.md`](docs/PRD.md)
 - **The original board:** [`docs/assets/whiteboard-2026-09.jpg`](docs/assets/whiteboard-2026-09.jpg)
@@ -81,6 +80,17 @@ npm run build # regenerate dist/artifact.html after editing app/index.html
 
 With no shared storage available the app falls back to this browser alone and
 says so on the board, so the page always works.
+
+## How it is served
+
+`supabase/functions/board` is a Deno edge function that serves `app/` to anyone
+with the link. It proxies the files straight from GitHub raw, so a push updates
+the board with no redeploy; the pinned commit in `REFS` is the fallback. It runs
+with `verify_jwt` off because there is nothing privileged to protect: it serves
+public files and reads nothing from the caller.
+
+The happy side effect is that the page and the database share an origin, so
+there is no cross-site request to be blocked.
 
 ## Data
 
