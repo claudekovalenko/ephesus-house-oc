@@ -560,6 +560,19 @@
           }).join('') + '</div></div>';
       }
 
+      /* Standing jobs split by whether they belong to someone. Work with an
+         owner has to be visible; work with none stays out of the way. */
+      var standing = R.standing(s, today);
+      var owned = standing.filter(function (x) { return !x.shared; });
+      var free = standing.filter(function (x) { return !!x.shared; });
+
+      if (owned.length) {
+        out += '<div class="sec"><div class="sec-head"><h2>This fortnight</h2>' +
+          '<span class="aside">no set day</span></div>' +
+          '<div class="panel"><div class="items">' +
+          owned.map(this.itemHTML, this).join('') + '</div></div></div>';
+      }
+
       /* the week */
       var mineOnly = this.mineOnly && this.me;
       var awayNow = s.absences.filter(function (a) {
@@ -622,19 +635,18 @@
           '</div></div>';
       }
 
-      /* Standing work, kept out of the way: the homeowner does most of it and
-         will not be ticking anything, so it belongs below the day-to-day. */
-      var standing = R.standing(s, today);
-      if (standing.length) {
-        var helped = standing.filter(function (x) { return !!x.lastDone; }).length;
+      /* Unowned jobs, kept out of the way: nobody is on these and the
+         homeowner does most of them without touching the board. */
+      if (free.length) {
+        var helped = free.filter(function (x) { return !!x.lastDone; }).length;
         out += '<div class="sec"><details class="quiet">' +
           '<summary><span class="q-title">If you are free</span>' +
-          '<span class="q-note">' + standing.length + ' around the house' +
+          '<span class="q-note">' + free.length + ' around the house' +
           (helped ? ' \u00b7 ' + helped + ' logged lately' : '') + '</span></summary>' +
-          '<div class="items">' + standing.map(this.itemHTML, this).join('') + '</div>' +
+          '<div class="items">' + free.map(this.itemHTML, this).join('') + '</div>' +
           '<p class="hint" style="padding:12px 14px 14px">' +
-          'Most of this gets handled without the board and without anyone ticking a box. ' +
-          'Tick something only if you pitched in, so it shows up here.</p>' +
+          'Nobody is on these. Most of it gets handled without the board and without ' +
+          'anyone ticking a box. Tick something only if you pitched in.</p>' +
           '</details></div>';
       }
 

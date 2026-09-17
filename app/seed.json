@@ -86,7 +86,7 @@
     "deep-bathroom": {
       "anchorDate": "2026-09-14",
       "anchorPerson": "jett",
-      "cadence": "monthly",
+      "cadence": "biweekly",
       "checklist": [
         "Clean the shower",
         "Clean the shower door",
@@ -95,8 +95,8 @@
         "Sweep and mop the floor"
       ],
       "isZone": false,
-      "mode": "everyone",
-      "name": "Bathroom, a proper clean",
+      "mode": "rotate",
+      "name": "Deep clean the bathroom",
       "note": "",
       "order": 11,
       "undated": true,
@@ -143,7 +143,7 @@
       "anchorDate": "2026-09-14",
       "anchorPerson": "ivan",
       "cadence": "weekly",
-      "day": 2,
+      "day": 3,
       "isZone": false,
       "mode": "rotate",
       "name": "Clean the pool",
@@ -162,6 +162,18 @@
       "note": "Both bins to the curb",
       "order": 2,
       "window": "4–8 PM"
+    },
+    "mopping": {
+      "name": "Mop the floors",
+      "mode": "rotate",
+      "cadence": "biweekly",
+      "anchorPerson": "demitrius",
+      "anchorDate": "2026-09-14",
+      "undated": true,
+      "isZone": false,
+      "window": "",
+      "note": "",
+      "order": 13
     }
   },
   "updates": {

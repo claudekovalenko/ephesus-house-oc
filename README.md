@@ -29,7 +29,7 @@ turns and keeps the rotation fair, with no erasing and rewriting.
 
 | Screen | What it is for |
 |---|---|
-| **Board** | Today, the week day by day, open special tasks, a collapsed panel of jobs anyone can pitch in on, a four-week fairness check, and every reminder |
+| **Board** | Today, this fortnight's assigned jobs, the week day by day, open special tasks, a collapsed panel of jobs anyone can pitch in on, a four-week fairness check, and every reminder |
 | **Special tasks** | One-off tasks with due dates. "Next in rotation" picks whoever is up and home |
 | **Away** | Date ranges per housemate, with a preview of exactly what moves before you save |
 | **Settings** | Housemates, rotation order, chores, reminders, week start, time zone |

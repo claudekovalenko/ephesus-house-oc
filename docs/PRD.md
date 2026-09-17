@@ -52,17 +52,28 @@ This is the initial data the app ships with. Everything here must be editable in
 | Day | Chore | Notes / window |
 |---|---|---|
 | Monday | *(nothing scheduled)* | |
-| Tuesday | Clean pool | |
+| Wednesday | Clean pool | *(moved from Tuesday, 2026-09-17)* |
 | Wednesday | Take out trash (bins) | Between 4–8 PM |
 | Thursday | Bring in cans | In the morning. Handles toward the street. |
 | Friday | *(see reminders)* | Street sweeping — see §4.5. It is a standing reminder, not an assigned turn. |
 
-### 4.3 The proper clean (added 2026-09-14, not from the board)
+### 4.3 Cleaning (added 2026-09-14, not from the board)
 
-**Nobody is assigned.** Three areas sit on the board as a standing list of jobs;
-whoever has time picks something off and ticks it. No owner, no date, no deadline.
-Ticks clear at the start of each month so the list does not read as permanently
-done.
+Split in two, because leaving it all unassigned did not work.
+
+**On the rotation, a turn each fortnight, no set day.** The bathroom deep clean
+and mopping the floors. Each has an owner for the current fortnight and appears
+under "This fortnight" near the top of the board with days remaining. Their
+anchors are offset, so the same person is never on both at once.
+
+**Nobody assigned.** The kitchen and the living and dining room still sit as a
+standing list of jobs under "If you are free", collapsed and below the day-to-day.
+Ticks clear monthly.
+
+> Changed 2026-09-17: "the free thing keeps on failing". Unassigned work was not
+> getting done, so the two jobs the house cared about most went back on the
+> rotation. The unassigned treatment survives only for the areas the homeowner
+> largely handles.
 
 > Changed 2026-09-16: this began as a deep clean every two weeks, each area held
 > by one person for a month. The house dropped the rotation — "we aren't going to
