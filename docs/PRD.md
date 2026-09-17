@@ -111,6 +111,7 @@ Transcribed from the second photo of the board, which shows more than the first.
 - No wet items on the cabinet (wood)
 - Open both shower and bathroom door after use
 - Leave toilet lid on
+- Wash your hands *(added 2026-09-17)*
 - Shave on a paper towel
 - Squeegee shower glass
 - Wipe the rail at the bottom of the shower window after showering *(added 2026-09-17)*
