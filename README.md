@@ -6,14 +6,20 @@ It answers one question the whiteboard could not: **who is on what this week,
 given who is actually home.** Mark someone away and the board reassigns their
 turns and keeps the rotation fair, with no erasing and rewriting.
 
-- **The board:** https://dmiysgmhwpkrunmswtrn.supabase.co/functions/v1/board/
-  — the link to hand out. No account, no sign-in, any browser. Verified end to
-  end: the page and every asset serve, and an anonymous visitor can both read
-  the board and write to it.
-- **Connection check:** https://dmiysgmhwpkrunmswtrn.supabase.co/functions/v1/board/check.html
-- **On Claude:** https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN — the same
-  app, but its store only works for people signed in to the owner's Claude
+- **The board:** https://claudekovalenko.github.io/ephesus-house-oc/app/
+  — the link to hand out. No account, any browser. Verified end to end: the page
+  and every asset serve, the API allows the request cross-origin, and an
+  anonymous visitor can both read and write.
+- **Connection check:** https://claudekovalenko.github.io/ephesus-house-oc/app/check.html
+- **On Claude:** https://claude.ai/artifact/AedHKUAS3UuH6fXWKzTqUN — the same app,
+  but its store only works for people signed in to the owner's Claude
   organisation, so it is not the one to share.
+
+> GitHub Pages publishes the repository as it is, so the app lives under `/app/`,
+> not at the root. That mismatch cost days: the root served Jekyll's rendering of
+> this README with a 200, which looked exactly like a broken deployment from the
+> outside. The root now redirects to the app and `.nojekyll` stops Jekyll running
+> at all.
 
 - **Product requirements:** [`docs/PRD.md`](docs/PRD.md)
 - **The original board:** [`docs/assets/whiteboard-2026-09.jpg`](docs/assets/whiteboard-2026-09.jpg)
@@ -80,14 +86,13 @@ says so on the board, so the page always works.
 
 ## How it is served
 
-`supabase/functions/board` is a Deno edge function that serves `app/` to anyone
-with the link. It proxies the files straight from GitHub raw, so a push updates
-the board with no redeploy; the pinned commit in `REFS` is the fallback. It runs
-with `verify_jwt` off because there is nothing privileged to protect: it serves
-public files and reads nothing from the caller.
+GitHub Pages, straight from this branch. A push updates the board.
 
-The happy side effect is that the page and the database share an origin, so
-there is no cross-site request to be blocked.
+`supabase/functions/board` now only redirects to that URL, so the Supabase link
+handed out earlier keeps working. It cannot serve the board itself: Supabase
+rewrites `text/html` to `text/plain` on edge function responses and sends
+`nosniff`, so a browser shows the page as source instead of rendering it. That
+is a platform rule, not something the function can work around.
 
 ## Data
 
