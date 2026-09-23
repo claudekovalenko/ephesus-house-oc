@@ -94,12 +94,12 @@
         "Clean the sink and counter",
         "Sweep and mop the floor"
       ],
+      "day": 3,
       "isZone": false,
       "mode": "rotate",
       "name": "Deep clean the bathroom",
       "note": "",
       "order": 11,
-      "undated": true,
       "window": ""
     },
     "deep-kitchen": {

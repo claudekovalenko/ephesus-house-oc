@@ -54,6 +54,7 @@ This is the initial data the app ships with. Everything here must be editable in
 | Monday | *(nothing scheduled)* | |
 | Wednesday | Clean pool | *(moved from Tuesday, 2026-09-17)* |
 | Wednesday | Take out trash (bins) | Between 4–8 PM |
+| Wednesday, every other week | Deep clean the bathroom | *(given a day 2026-09-23, see §4.3)* |
 | Thursday | Bring in cans | In the morning. Handles toward the street. |
 | Friday | *(see reminders)* | Street sweeping — see §4.5. It is a standing reminder, not an assigned turn. |
 
@@ -61,10 +62,16 @@ This is the initial data the app ships with. Everything here must be editable in
 
 Split in two, because leaving it all unassigned did not work.
 
-**On the rotation, a turn each fortnight, no set day.** The bathroom deep clean
-and mopping the floors. Each has an owner for the current fortnight and appears
-under "This fortnight" near the top of the board with days remaining. Their
-anchors are offset, so the same person is never on both at once.
+**On the rotation, a turn each fortnight.** The bathroom deep clean and mopping
+the floors. The deep clean is done on a Wednesday, every other week, and sits on
+that day in the week view with its checklist. Mopping has no set day: it has an
+owner for the current fortnight and appears under "This fortnight" near the top
+of the board with days remaining. Their anchors are offset, so the same person is
+never on both at once.
+
+> Changed 2026-09-23: the bathroom deep clean moved from "any day this fortnight"
+> to Wednesday, every other week (16 Sep, 30 Sep, 14 Oct, ...). The rotation is
+> unchanged: Jett held the fortnight of 16 Sep, Demitrius is up on 30 Sep.
 
 **Nobody assigned.** The kitchen and the living and dining room still sit as a
 standing list of jobs under "If you are free", collapsed and below the day-to-day.
