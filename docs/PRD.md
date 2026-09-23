@@ -105,7 +105,7 @@ Ticks clear monthly.
 
 | Area | Jobs |
 |---|---|
-| Kitchen | Sweep and mop the floor · clear the counters and clean them fully, under everything · clean the inside of the sink · wipe down the tables · clean the stove |
+| Kitchen | Clear the counters and clean them fully, under everything · clean the inside of the sink · wipe down the tables · clean the stove |
 | Bathroom | Clean the shower · clean the shower door · clean the toilet, and get behind it · clean the sink and counter |
 | Mopping | Sweep and mop the bathroom · sweep and mop the kitchen *(the bathroom floor moved here from the deep clean, 2026-09-23)* |
 | Living and dining room | Dust · dust the fans · vacuum · wipe down the tables |
