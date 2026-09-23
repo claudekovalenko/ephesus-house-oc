@@ -70,8 +70,11 @@ of the board with days remaining. Their anchors are offset, so the same person i
 never on both at once.
 
 > Changed 2026-09-23: the bathroom deep clean moved from "any day this fortnight"
-> to Wednesday, every other week (16 Sep, 30 Sep, 14 Oct, ...). The rotation is
-> unchanged: Jett held the fortnight of 16 Sep, Demitrius is up on 30 Sep.
+> to Wednesday, every other week, starting that day (23 Sep, 7 Oct, 21 Oct, ...).
+> The cycle is anchored on the week of 21 Sep so the current week carries one;
+> anchored on 14 Sep it fell on 16 Sep and 30 Sep, and the job vanished from the
+> board in between. Jett, who held the fortnight, keeps the 23 Sep turn;
+> Demitrius is up on 7 Oct.
 
 **Nobody assigned.** The kitchen and the living and dining room still sit as a
 standing list of jobs under "If you are free", collapsed and below the day-to-day.
