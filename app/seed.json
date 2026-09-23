@@ -166,14 +166,14 @@
     "mopping": {
       "name": "Mop the floors",
       "mode": "rotate",
-      "cadence": "biweekly",
+      "cadence": "weekly",
       "anchorPerson": "demitrius",
-      "anchorDate": "2026-09-14",
-      "undated": true,
+      "anchorDate": "2026-09-21",
       "isZone": false,
       "window": "",
       "note": "",
-      "order": 13
+      "order": 13,
+      "day": 3
     }
   },
   "updates": {
