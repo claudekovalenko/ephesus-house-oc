@@ -689,9 +689,6 @@
       if (item.coveringFor) {
         meta += '<span class="tag cover">covering ' + h(nameOf(s, item.coveringFor)) + '</span>';
       }
-      if (item.swappedFrom) {
-        meta += '<span class="tag swap">swapped from ' + h(nameOf(s, item.swappedFrom)) + '</span>';
-      }
       if (item.away) meta += '<span class="tag away">away</span>';
       if (item.unassigned) meta += '<span class="tag away">house away</span>';
       if (item.doneAt && item.doneBy) {
