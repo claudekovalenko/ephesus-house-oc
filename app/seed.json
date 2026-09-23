@@ -91,8 +91,7 @@
         "Clean the shower",
         "Clean the shower door",
         "Clean the toilet, and get behind it",
-        "Clean the sink and counter",
-        "Sweep and mop the floor"
+        "Clean the sink and counter"
       ],
       "day": 3,
       "isZone": false,
@@ -167,6 +166,10 @@
       "name": "Mop the floors",
       "mode": "rotate",
       "cadence": "weekly",
+      "checklist": [
+        "Sweep and mop the bathroom",
+        "Sweep and mop the living room"
+      ],
       "anchorPerson": "ivan",
       "anchorDate": "2026-09-21",
       "isZone": false,
