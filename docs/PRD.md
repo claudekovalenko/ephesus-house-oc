@@ -54,6 +54,8 @@ This is the initial data the app ships with. Everything here must be editable in
 | Monday | *(nothing scheduled)* | |
 | Wednesday | Clean pool | *(moved from Tuesday, 2026-09-17)* |
 | Wednesday | Take out trash (bins) | Between 4–8 PM |
+| Wednesday | Deep clean the bathroom | Every week *(given a day 2026-09-23, see §4.3)* |
+| Wednesday | Mop the floors | Every week *(given a day 2026-09-23, see §4.3)* |
 | Thursday | Bring in cans | In the morning. Handles toward the street. |
 | Friday | *(see reminders)* | Street sweeping — see §4.5. It is a standing reminder, not an assigned turn. |
 
@@ -61,10 +63,21 @@ This is the initial data the app ships with. Everything here must be editable in
 
 Split in two, because leaving it all unassigned did not work.
 
-**On the rotation, a turn each fortnight, no set day.** The bathroom deep clean
-and mopping the floors. Each has an owner for the current fortnight and appears
-under "This fortnight" near the top of the board with days remaining. Their
-anchors are offset, so the same person is never on both at once.
+**On the rotation, every Wednesday.** The bathroom deep clean and mopping the
+floors, a turn each week, shown on Wednesday in the week view like any other
+chore. Their anchors are offset by one, so the same person is never on both in
+the same week: 23 Sep Jett cleans and Demitrius mops, 30 Sep Demitrius and Ivan,
+7 Oct Ivan and Jett. With no undated owned work left, the "This fortnight"
+section no longer appears.
+
+> Changed 2026-09-23: the bathroom deep clean moved from "any day this fortnight"
+> to Wednesday, every other week, starting that day (23 Sep, 7 Oct, 21 Oct, ...).
+> The cycle is anchored on the week of 21 Sep so the current week carries one;
+> anchored on 14 Sep it fell on 16 Sep and 30 Sep, and the job vanished from the
+> board in between. Jett, who held the fortnight, keeps the 23 Sep turn;
+> Demitrius is up on 7 Oct. Made weekly the same day, and mopping moved from
+> "any day this fortnight" to every Wednesday too: the fortnight window
+> confused the house more than it helped.
 
 **Nobody assigned.** The kitchen and the living and dining room still sit as a
 standing list of jobs under "If you are free", collapsed and below the day-to-day.

@@ -84,9 +84,9 @@
       "window": "Morning"
     },
     "deep-bathroom": {
-      "anchorDate": "2026-09-14",
+      "anchorDate": "2026-09-21",
       "anchorPerson": "jett",
-      "cadence": "biweekly",
+      "cadence": "weekly",
       "checklist": [
         "Clean the shower",
         "Clean the shower door",
@@ -94,12 +94,12 @@
         "Clean the sink and counter",
         "Sweep and mop the floor"
       ],
+      "day": 3,
       "isZone": false,
       "mode": "rotate",
       "name": "Deep clean the bathroom",
       "note": "",
       "order": 11,
-      "undated": true,
       "window": ""
     },
     "deep-kitchen": {
@@ -166,14 +166,14 @@
     "mopping": {
       "name": "Mop the floors",
       "mode": "rotate",
-      "cadence": "biweekly",
+      "cadence": "weekly",
       "anchorPerson": "demitrius",
-      "anchorDate": "2026-09-14",
-      "undated": true,
+      "anchorDate": "2026-09-21",
       "isZone": false,
       "window": "",
       "note": "",
-      "order": 13
+      "order": 13,
+      "day": 3
     }
   },
   "updates": {
