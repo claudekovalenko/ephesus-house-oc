@@ -52,7 +52,7 @@ This is the initial data the app ships with. Everything here must be editable in
 | Day | Chore | Notes / window |
 |---|---|---|
 | Monday | *(nothing scheduled)* | |
-| Wednesday | Clean pool | Always Demitrius *(fixed 2026-09-23; moved from Tuesday, 2026-09-17)* |
+| Wednesday | Clean pool | *(moved from Tuesday, 2026-09-17)* |
 | Wednesday | Take out trash (bins) | Between 4–8 PM |
 | Wednesday | Deep clean the bathroom | Every week *(given a day 2026-09-23, see §4.3)* |
 | Wednesday | Mop the floors | Every week *(given a day 2026-09-23, see §4.3)* |
@@ -66,13 +66,19 @@ Split in two, because leaving it all unassigned did not work.
 **On the rotation, every Wednesday.** The bathroom deep clean and mopping the
 floors, a turn each week, shown on Wednesday in the week view like any other
 chore. Their anchors are offset by one, so the same person is never on both in
-the same week: 23 Sep Jett cleans and Demitrius mops, 30 Sep Demitrius and Ivan,
-7 Oct Ivan and Jett. With no undated owned work left, the "This fortnight"
-section no longer appears.
+the same week. With no undated owned work left, the "This fortnight" section no
+longer appears.
 
-Whoever has the bathroom gets nothing else that week where it can be helped. The
-rotations are offset so the bathroom person is never on trash, mopping or cans;
-the pool, always Demitrius, is the one exception, on his bathroom weeks.
+Whoever has the bathroom gets nothing else that week. Every chore rotates, and
+the anchors are offset so the week's five jobs always split the same way: the
+bathroom alone for one person, pool and trash for the next, mopping and cans for
+the third. Over any three weeks everyone does the same five.
+
+| Week of | Bathroom | Pool, trash | Mopping, cans |
+|---|---|---|---|
+| 21 Sep | Jett | Demitrius | Ivan |
+| 28 Sep | Demitrius | Ivan | Jett |
+| 5 Oct | Ivan | Jett | Demitrius |
 
 > Changed 2026-09-23: the bathroom deep clean moved from "any day this fortnight"
 > to Wednesday, every other week, starting that day (23 Sep, 7 Oct, 21 Oct, ...).
