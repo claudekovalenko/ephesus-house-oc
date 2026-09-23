@@ -54,6 +54,7 @@ This is the initial data the app ships with. Everything here must be editable in
 | Monday | *(nothing scheduled)* | |
 | Wednesday | Clean pool | *(moved from Tuesday, 2026-09-17)* |
 | Wednesday | Take out trash (bins) | Between 4–8 PM |
+| Wednesday | Break down the boxes | In the morning. All the foam in one box. *(added 2026-09-23; was a one-off special task)* |
 | Wednesday | Deep clean the bathroom | Every week *(given a day 2026-09-23, see §4.3)* |
 | Wednesday | Mop the floors | Every week *(given a day 2026-09-23, see §4.3)* |
 | Thursday | Bring in cans | In the morning. Handles toward the street. |
@@ -71,10 +72,10 @@ longer appears.
 
 Whoever has the bathroom gets nothing else that week. Every chore rotates, and
 the anchors are offset so the week's five jobs always split the same way: the
-bathroom alone for one person, pool and trash for the next, mopping and cans for
-the third. Over any three weeks everyone does the same five.
+bathroom alone for one person, pool and trash for the next, mopping, cans and the
+boxes for the third. Over any three weeks everyone does the same six.
 
-| Week of | Bathroom | Pool, trash | Mopping, cans |
+| Week of | Bathroom | Pool, trash | Mopping, cans, boxes |
 |---|---|---|---|
 | 21 Sep | Jett | Demitrius | Ivan |
 | 28 Sep | Demitrius | Ivan | Jett |

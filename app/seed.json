@@ -176,19 +176,21 @@
       "note": "",
       "order": 13,
       "day": 3
+    },
+    "boxes": {
+      "anchorDate": "2026-09-21",
+      "anchorPerson": "ivan",
+      "cadence": "weekly",
+      "day": 3,
+      "isZone": false,
+      "mode": "rotate",
+      "name": "Break down the boxes",
+      "note": "All the foam in one box",
+      "order": 4,
+      "window": "Morning"
     }
   },
   "updates": {
-    "u-cardboard": {
-      "assignee": null,
-      "createdAt": "2026-09-14T00:00:00.000Z",
-      "createdBy": null,
-      "doneAt": null,
-      "doneBy": null,
-      "due": null,
-      "note": "All the foam in one box",
-      "title": "Break down the cardboard"
-    },
     "u-lights": {
       "assignee": null,
       "createdAt": "2026-09-14T00:00:00.000Z",
