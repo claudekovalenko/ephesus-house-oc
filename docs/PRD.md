@@ -52,7 +52,7 @@ This is the initial data the app ships with. Everything here must be editable in
 | Day | Chore | Notes / window |
 |---|---|---|
 | Monday | *(nothing scheduled)* | |
-| Wednesday | Clean pool | *(moved from Tuesday, 2026-09-17)* |
+| Wednesday | Clean pool | Always Demitrius *(fixed 2026-09-23; moved from Tuesday, 2026-09-17)* |
 | Wednesday | Take out trash (bins) | Between 4–8 PM |
 | Wednesday | Deep clean the bathroom | Every week *(given a day 2026-09-23, see §4.3)* |
 | Wednesday | Mop the floors | Every week *(given a day 2026-09-23, see §4.3)* |
@@ -69,6 +69,10 @@ chore. Their anchors are offset by one, so the same person is never on both in
 the same week: 23 Sep Jett cleans and Demitrius mops, 30 Sep Demitrius and Ivan,
 7 Oct Ivan and Jett. With no undated owned work left, the "This fortnight"
 section no longer appears.
+
+Whoever has the bathroom gets nothing else that week where it can be helped. The
+rotations are offset so the bathroom person is never on trash, mopping or cans;
+the pool, always Demitrius, is the one exception, on his bathroom weeks.
 
 > Changed 2026-09-23: the bathroom deep clean moved from "any day this fortnight"
 > to Wednesday, every other week, starting that day (23 Sep, 7 Oct, 21 Oct, ...).
